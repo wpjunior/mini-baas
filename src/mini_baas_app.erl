@@ -1,0 +1,28 @@
+-module(mini_baas_app).
+-behaviour(application).
+
+%% API.
+-export([start/2]).
+-export([stop/1]).
+
+%% API.
+
+start(_Type, _Args) ->
+    application:start (bson),
+    application:start (mongodb),
+
+    {ok, MongoConnection} = mongo:connect (<<"test">>),
+
+    Dispatch = cowboy_router:compile([
+        {'_', [
+               {"/api/:collection_name", collection_handler, [MongoConnection]},
+               {"/api/:collection_name/:pk", resource_handler, [MongoConnection]}
+              ]}
+       ]),
+    {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [
+                                                            {env, [{dispatch, Dispatch}]}
+                                                           ]),
+    mini_baas_sup:start_link().
+
+stop(_State) ->
+    ok.

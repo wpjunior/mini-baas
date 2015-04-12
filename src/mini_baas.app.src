@@ -1,0 +1,16 @@
+{application, mini_baas, [
+	{description, "Cowboy REST Hello World example."},
+	{vsn, "1"},
+	{modules, []},
+	{registered, [mini_baas_sup]},
+	{applications, [
+		kernel,
+		stdlib,
+		cowboy,
+                eredis,
+                mongodb,
+                jiffy
+        ]},
+	{mod, {mini_baas_app, []}},
+	{env, []}
+]}.

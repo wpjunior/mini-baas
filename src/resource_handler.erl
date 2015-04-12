@@ -32,18 +32,8 @@ get_response_from_mongo({}, Req, Opts) ->
     {ok, Resp, Opts};
 
 get_response_from_mongo({Document}, Req, Opts) ->
-    JsonResp = jiffy:encode({to_proplist(Document)}),
+    JsonResp = jiffy:encode(resource_object:from_bson(Document)),
     Resp = cowboy_req:reply(200, [
                                   {<<"content-type">>, <<"application/json">>}
                                  ], JsonResp, Req),
     {ok, Resp, Opts}.
-
-to_proplist([]) ->
-	[];
-to_proplist({}) ->
-	[];
-to_proplist({Tuple}) ->
-	to_proplist(Tuple);
-to_proplist(Tuple) ->
-	Size = tuple_size(Tuple),
-	[{element(X, Tuple), element(X + 1, Tuple)} || X <- lists:seq(1, Size, 2)].

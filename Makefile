@@ -1,3 +1,4 @@
+.PHONY: test
 PROJECT = mini_baas
 DEPS = cowboy eredis mongodb jiffy
 
@@ -10,3 +11,10 @@ include erlang.mk
 
 run: all
 	./_rel/mini_baas/bin/mini_baas console
+
+setup:
+	./rebar g-d
+	./rebar co
+
+test:
+	./rebar eu

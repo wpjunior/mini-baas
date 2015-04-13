@@ -19,7 +19,7 @@ to_bson(Document, PrimaryKeyName) ->
     {AttrList} = Document,
     PrimaryKeyValue = proplists:get_value(PrimaryKeyName, AttrList),
 
-    recursive_convert_to_bson_document({[{'_id', PrimaryKeyValue} | proplists:delete(PrimaryKeyName, AttrList)]}).
+    recursive_convert_to_bson({[{'_id', PrimaryKeyValue} | proplists:delete(PrimaryKeyName, AttrList)]}).
 
 recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
     Size = tuple_size(BsonDocument),
@@ -28,8 +28,8 @@ recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
 recursive_convert_to_json(BsonDocument) ->
     BsonDocument.
 
-recursive_convert_to_bson_document({PropList}) when erlang:is_list(PropList)->
-    bson:document([{K, recursive_convert_to_bson_document(V)} || {K, V} <- PropList]);
+recursive_convert_to_bson({PropList}) when erlang:is_list(PropList)->
+    bson:document([{K, recursive_convert_to_bson(V)} || {K, V} <- PropList]);
 
-recursive_convert_to_bson_document(Value) ->
+recursive_convert_to_bson(Value) ->
     Value.

@@ -13,10 +13,17 @@ handle(<<"GET">>, MongoConnection, _, Req) ->
 
 handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),
-    Resource = resource_object:from_json(Body),
-    MongoResp = mongo:insert(MongoConnection, CollectionName, [Resource]),
 
-    Resp = cowboy_req:reply(201, Req),
+    Resource = resource_object:from_json(Body),
+
+    PrimaryKey = erlang:list_to_binary(uuid:to_string(uuid:uuid4())),
+    ResourceWithPrimaryKey = bson:update('_id', PrimaryKey, Resource),
+
+    mongo:insert(MongoConnection, CollectionName, [ResourceWithPrimaryKey]),
+    JsonBody = jiffy:encode(resource_object:to_json(ResourceWithPrimaryKey)),
+    Resp = cowboy_req:reply(201, [
+                                  {<<"content-type">>, <<"application/json">>}
+                                 ], JsonBody, Req),
     {ok, Resp, [MongoConnection]};
 
 handle(_, MongoConnection, _, Req)->

@@ -9,7 +9,8 @@
 		cowboy,
                 eredis,
                 mongodb,
-                jiffy
+                jiffy,
+                uuid
         ]},
 	{mod, {mini_baas_app, []}},
 	{env, []}

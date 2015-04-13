@@ -1,26 +1,26 @@
 -module(test_resource_object).
 -include_lib("eunit/include/eunit.hrl").
 
-from_bson_one_depth_test() ->
+to_json_one_depth_test() ->
     ?assertEqual({[{id, "123"}, {name, "wilson"}]},
-                 resource_object:from_bson({'_id', "123", name, "wilson"})).
+                 resource_object:to_json({'_id', "123", name, "wilson"})).
 
-from_bson_two_depth_test() ->
+to_json_two_depth_test() ->
     InputEmbeddedField = {field1, "321", field2, 3},
     ExpectedEmbeddedField = {[{field1, "321"}, {field2, 3}]},
     ?assertEqual({[{id, "123"}, {name, "wilson"}, {second, ExpectedEmbeddedField}]},
-                 resource_object:from_bson({'_id', "123", name, "wilson",
+                 resource_object:to_json({'_id', "123", name, "wilson",
                                             second, InputEmbeddedField})).
 
-from_bson_one_depth_with_custom_primary_key_test() ->
+to_json_one_depth_with_custom_primary_key_test() ->
     ?assertEqual({[{slug, "123"}, {name, "wilson"}]},
-                 resource_object:from_bson({'_id', "123", name, "wilson"}, slug)).
+                 resource_object:to_json({'_id', "123", name, "wilson"}, slug)).
 
-from_bson_two_depth_with_custom_primary_key_test() ->
+to_json_two_depth_with_custom_primary_key_test() ->
     InputEmbeddedField = {field1, "321", field2, 3},
     ExpectedEmbeddedField = {[{field1, "321"}, {field2, 3}]},
     ?assertEqual({[{customId, "123"}, {name, "wilson"}, {second, ExpectedEmbeddedField}]},
-                 resource_object:from_bson({'_id', "123", name, "wilson",
+                 resource_object:to_json({'_id', "123", name, "wilson",
                                             second, InputEmbeddedField}, customId)).
 
 to_bson_one_depth_test() ->

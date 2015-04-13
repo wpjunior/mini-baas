@@ -1,13 +1,16 @@
 -module(resource_object).
--export([from_bson/1, from_bson/2,
+-export([to_json/1, to_json/2,
          to_bson/1, to_bson/2]).
 
-from_bson(BsonDocument) ->
-    from_bson(BsonDocument, id).
+to_json(ResourceDocument) ->
+    to_json(ResourceDocument, id).
 
-from_bson(BsonDocument, PrimaryKeyName) ->
-    {[{'_id', PrimaryKeyValue} | RemaingValues]} = to_proplist(BsonDocument),
-    {[{PrimaryKeyName, PrimaryKeyValue} | RemaingValues]}.
+to_json(ResourceDocument, PrimaryKeyName) ->
+    {PrimaryKeyValue} = bson:lookup('_id', ResourceDocument),
+    TailResourceDocument = bson:exclude(['_id'], ResourceDocument),
+
+    {TailConvertedDocument} = recursive_convert_to_json(TailResourceDocument),
+    {[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}.
 
 to_bson(Document) ->
     to_bson(Document, id).
@@ -18,27 +21,15 @@ to_bson(Document, PrimaryKeyName) ->
 
     recursive_convert_to_bson_document({[{'_id', PrimaryKeyValue} | proplists:delete(PrimaryKeyName, AttrList)]}).
 
-to_proplist([]) ->
-	[];
+recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
+    Size = tuple_size(BsonDocument),
+    {[{element(X, BsonDocument), recursive_convert_to_json(element(X + 1, BsonDocument))} || X <- lists:seq(1, Size, 2)]};
 
-to_proplist({}) ->
-	[];
+recursive_convert_to_json(BsonDocument) ->
+    BsonDocument.
 
-to_proplist({Tuple}) ->
-	to_proplist(Tuple);
-
-to_proplist(Tuple) ->
-	Size = tuple_size(Tuple),
-	{[{element(X, Tuple), recursive_convert(element(X + 1, Tuple))} || X <- lists:seq(1, Size, 2)]}.
-
-recursive_convert(Value) when erlang:is_tuple(Value) ->
-    to_proplist(Value);
-
-recursive_convert(Value) ->
-    Value.
-
-recursive_convert_to_bson_document(Value = {PropList}) when erlang:is_list(PropList)->
-    bson:document([{Key, recursive_convert_to_bson_document(Value)} || {Key, Value} <- PropList]);
+recursive_convert_to_bson_document({PropList}) when erlang:is_list(PropList)->
+    bson:document([{K, recursive_convert_to_bson_document(V)} || {K, V} <- PropList]);
 
 recursive_convert_to_bson_document(Value) ->
     Value.

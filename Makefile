@@ -10,7 +10,7 @@ dep_mongodb = git https://github.com/comtihon/mongodb-erlang master
 include erlang.mk
 
 run: all
-	./_rel/mini_baas/bin/mini_baas console
+	./_rel/mini_baas/bin/mini_baas foreground
 
 setup:
 	./rebar g-d

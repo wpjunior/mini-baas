@@ -28,6 +28,11 @@ from_json_one_depth_test() ->
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>},
                  resource_object:from_json(Json)).
 
+from_json_primary_key_missing_test() ->
+    Json = <<"{\"name\": \"wilson\"}">>,
+    ?assertEqual({name, <<"wilson">>},
+                 resource_object:from_json(Json)).
+
 from_json_two_depth_test() ->
     Json = <<"{\"id\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
     ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},

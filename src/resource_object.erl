@@ -19,9 +19,17 @@ from_json(Document, PrimaryKeyName) when is_binary(Document)->
     PrimaryKeyNameBinary = erlang:atom_to_binary(PrimaryKeyName, unicode),
     DecodeDocument = jiffy:decode(Document),
     {AttrList} = DecodeDocument,
-    PrimaryKeyValue = proplists:get_value(PrimaryKeyNameBinary, AttrList),
+    PrimaryKeyFound = proplists:is_defined(PrimaryKeyNameBinary, AttrList),
 
-    recursive_convert_from_json({[{<<"_id">>, PrimaryKeyValue} | proplists:delete(PrimaryKeyNameBinary, AttrList)]}).
+    if
+        PrimaryKeyFound ->
+            PrimaryKeyValue = proplists:get_value(PrimaryKeyNameBinary, AttrList),
+            recursive_convert_from_json({[{<<"_id">>, PrimaryKeyValue} | proplists:delete(PrimaryKeyNameBinary, AttrList)]});
+
+        true ->
+            recursive_convert_from_json(DecodeDocument)
+    end.
+
 
 recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
     Size = tuple_size(BsonDocument),

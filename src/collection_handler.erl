@@ -1,20 +1,24 @@
 -module(collection_handler).
 
 -export([init/2]).
--export([content_types_provided/2]).
--export([hello_to_html/2]).
 
-init(Req, Opts) ->
-    io:format("Req: ~p\n", [Req]),
-    %[LogLink] = Opts,
-    %LogLink ! {"Named: ~s\n", ["named"]},
-    {cowboy_rest, Req, Opts}.
+init(Req, [MongoConnection]) ->
+    Method = cowboy_req:method(Req),
+    [{collection_name, CollectionName}] = cowboy_req:bindings(Req),
+    handle(Method, MongoConnection, CollectionName, Req).
 
-content_types_provided(Req, State) ->
-    {[
-      {<<"text/html">>, hello_to_html}
-     ], Req, State}.
+handle(<<"GET">>, MongoConnection, _, Req) ->
+    Resp = cowboy_req:reply(404, Req),
+    {ok, Resp, [MongoConnection]};
 
-hello_to_html(Req, State) ->
-    Body = "{\"Collection\": true}",
-	{Body, Req, State}.
+handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
+    {ok, Body, _} = cowboy_req:body(Req),
+    Resource = resource_object:from_json(Body),
+    MongoResp = mongo:insert(MongoConnection, CollectionName, [Resource]),
+
+    Resp = cowboy_req:reply(201, Req),
+    {ok, Resp, [MongoConnection]};
+
+handle(_, MongoConnection, _, Req)->
+    Resp = cowboy_req:reply(405, Req),
+    {ok, Resp, [MongoConnection]}.

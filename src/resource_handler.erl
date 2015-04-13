@@ -32,7 +32,7 @@ get_response_from_mongo({}, Req, Opts) ->
     {ok, Resp, Opts};
 
 get_response_from_mongo({Document}, Req, Opts) ->
-    JsonResp = jiffy:encode(resource_object:from_bson(Document)),
+    JsonResp = jiffy:encode(resource_object:to_json(Document)),
     Resp = cowboy_req:reply(200, [
                                   {<<"content-type">>, <<"application/json">>}
                                  ], JsonResp, Req),

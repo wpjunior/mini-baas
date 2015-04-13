@@ -23,24 +23,26 @@ to_json_two_depth_with_custom_primary_key_test() ->
                  resource_object:to_json({'_id', "123", name, "wilson",
                                             second, InputEmbeddedField}, customId)).
 
-to_bson_one_depth_test() ->
-    ?assertEqual({'_id', "123", name, "wilson"},
-                 resource_object:to_bson({[{id, "123"}, {name, "wilson"}]})).
+from_json_one_depth_test() ->
+    Json = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>},
+                 resource_object:from_json(Json)).
 
-to_bson_two_depth_test() ->
-    InputEmbeddedField = {[{field1, "321"}, {field2, 3}]},
-    ExpectedEmbeddedField = {field1, "321", field2, 3},
+from_json_two_depth_test() ->
+    Json = <<"{\"id\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
-    ?assertEqual({'_id', "123", name, "wilson", second, ExpectedEmbeddedField},
-                 resource_object:to_bson({[{id, "123"}, {name, "wilson"}, {second, InputEmbeddedField}]})).
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
+                 resource_object:from_json(Json)).
 
-to_bson_one_depth_with_custom_primary_key_test() ->
-    ?assertEqual({'_id', "123", name, "wilson"},
-                 resource_object:to_bson({[{slug, "123"}, {name, "wilson"}]}, slug)).
+from_json_one_depth_with_custom_primary_key_test() ->
+    Json = <<"{\"slug\": \"123\", \"name\": \"wilson\"}">>,
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>},
+                 resource_object:from_json(Json, slug)).
 
-to_bson_two_depth_with_custom_primary_key_test() ->
-    InputEmbeddedField = {[{field1, "321"}, {field2, 3}]},
-    ExpectedEmbeddedField = {field1, "321", field2, 3},
+from_json_two_depth_with_custom_primary_key_test() ->
+    Json = <<"{\"customId\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
-    ?assertEqual({'_id', "123", name, "wilson", second, ExpectedEmbeddedField},
-                 resource_object:to_bson({[{customId, "123"}, {name, "wilson"}, {second, InputEmbeddedField}]}, customId)).
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
+                 resource_object:from_json(Json, customId)).

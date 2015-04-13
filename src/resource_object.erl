@@ -1,6 +1,6 @@
 -module(resource_object).
 -export([to_json/1, to_json/2,
-         to_bson/1, to_bson/2]).
+         from_json/1, from_json/2]).
 
 to_json(ResourceDocument) ->
     to_json(ResourceDocument, id).
@@ -12,14 +12,16 @@ to_json(ResourceDocument, PrimaryKeyName) ->
     {TailConvertedDocument} = recursive_convert_to_json(TailResourceDocument),
     {[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}.
 
-to_bson(Document) ->
-    to_bson(Document, id).
+from_json(Document) ->
+    from_json(Document, id).
 
-to_bson(Document, PrimaryKeyName) ->
-    {AttrList} = Document,
-    PrimaryKeyValue = proplists:get_value(PrimaryKeyName, AttrList),
+from_json(Document, PrimaryKeyName) when is_binary(Document)->
+    PrimaryKeyNameBinary = erlang:atom_to_binary(PrimaryKeyName, unicode),
+    DecodeDocument = jiffy:decode(Document),
+    {AttrList} = DecodeDocument,
+    PrimaryKeyValue = proplists:get_value(PrimaryKeyNameBinary, AttrList),
 
-    recursive_convert_to_bson({[{'_id', PrimaryKeyValue} | proplists:delete(PrimaryKeyName, AttrList)]}).
+    recursive_convert_from_json({[{<<"_id">>, PrimaryKeyValue} | proplists:delete(PrimaryKeyNameBinary, AttrList)]}).
 
 recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
     Size = tuple_size(BsonDocument),
@@ -28,8 +30,8 @@ recursive_convert_to_json(BsonDocument) when erlang:is_tuple(BsonDocument) ->
 recursive_convert_to_json(BsonDocument) ->
     BsonDocument.
 
-recursive_convert_to_bson({PropList}) when erlang:is_list(PropList)->
-    bson:document([{K, recursive_convert_to_bson(V)} || {K, V} <- PropList]);
+recursive_convert_from_json({PropList}) when erlang:is_list(PropList)->
+    bson:document([{erlang:binary_to_atom(K, unicode), recursive_convert_from_json(V)} || {K, V} <- PropList]);
 
-recursive_convert_to_bson(Value) ->
+recursive_convert_from_json(Value) ->
     Value.

@@ -14,8 +14,18 @@ handle(<<"GET">>, MongoConnection, _, Req) ->
 handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),
 
-    Resource = resource_object:from_json(Body),
+    case resource_object:from_json(Body) of
+        {ok, Resource} ->
+            insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource);
+        {invalid_json, _} ->
+            invalid_json_response(MongoConnection, Req)
+    end;
 
+handle(_, MongoConnection, _, Req)->
+    Resp = cowboy_req:reply(405, Req),
+    {ok, Resp, [MongoConnection]}.
+
+insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource) ->
     PrimaryKey = erlang:list_to_binary(uuid:to_string(uuid:uuid4())),
     ResourceWithPrimaryKey = bson:update('_id', PrimaryKey, Resource),
 
@@ -24,8 +34,8 @@ handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     Resp = cowboy_req:reply(201, [
                                   {<<"content-type">>, <<"application/json">>}
                                  ], JsonBody, Req),
-    {ok, Resp, [MongoConnection]};
+    {ok, Resp, [MongoConnection]}.
 
-handle(_, MongoConnection, _, Req)->
-    Resp = cowboy_req:reply(405, Req),
+invalid_json_response(MongoConnection, Req) ->
+    Resp = cowboy_req:reply(422, Req),
     {ok, Resp, [MongoConnection]}.

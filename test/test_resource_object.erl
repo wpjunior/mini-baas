@@ -25,29 +25,43 @@ to_json_two_depth_with_custom_primary_key_test() ->
 
 from_json_one_depth_test() ->
     Json = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,
-    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>},
-                 resource_object:from_json(Json)).
+    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
+    ?assertEqual(ok, ReturnAtom),
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>}, BsonDocument).
 
 from_json_primary_key_missing_test() ->
     Json = <<"{\"name\": \"wilson\"}">>,
-    ?assertEqual({name, <<"wilson">>},
-                 resource_object:from_json(Json)).
+    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
+    ?assertEqual(ok, ReturnAtom),
+    ?assertEqual({name, <<"wilson">>}, BsonDocument).
 
 from_json_two_depth_test() ->
     Json = <<"{\"id\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
     ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
+    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
+    ?assertEqual(ok, ReturnAtom),
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
-                 resource_object:from_json(Json)).
+                 BsonDocument).
 
 from_json_one_depth_with_custom_primary_key_test() ->
     Json = <<"{\"slug\": \"123\", \"name\": \"wilson\"}">>,
-    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>},
-                 resource_object:from_json(Json, slug)).
+    {ReturnAtom, BsonDocument} = resource_object:from_json(Json, slug),
+
+    ?assertEqual(ok, ReturnAtom),
+    ?assertEqual({'_id', <<"123">>, name, <<"wilson">>}, BsonDocument).
 
 from_json_two_depth_with_custom_primary_key_test() ->
     Json = <<"{\"customId\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
     ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
+    {ReturnAtom, BsonDocument} = resource_object:from_json(Json, customId),
+    ?assertEqual(ok, ReturnAtom),
+
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
-                 resource_object:from_json(Json, customId)).
+                 BsonDocument).
+
+from_json_invalid_json_test() ->
+    Json = <<"{}..A..B..">>,
+    {ReturnAtom, _} = resource_object:from_json(Json),
+    ?assertEqual(ReturnAtom, invalid_json).

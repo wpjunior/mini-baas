@@ -16,8 +16,16 @@ from_json(JsonDocument) ->
     from_json(JsonDocument, id).
 
 from_json(JsonDocument, PrimaryKeyName) when is_binary(JsonDocument)->
+    try jiffy:decode(JsonDocument) of
+         JsonDocumentDecoded ->
+            {ok, json_decoded_to_bson(JsonDocumentDecoded, PrimaryKeyName)}
+    catch
+        _ ->
+            {invalid_json, undefined}
+    end.
+
+json_decoded_to_bson(JsonDocumentDecoded, PrimaryKeyName) ->
     PrimaryKeyNameBinary = erlang:atom_to_binary(PrimaryKeyName, unicode),
-    JsonDocumentDecoded = jiffy:decode(JsonDocument),
     {AttrList} = JsonDocumentDecoded,
     PrimaryKeyFound = proplists:is_defined(PrimaryKeyNameBinary, AttrList),
 

@@ -11,14 +11,16 @@ from unittest import TestCase, skip
 TARGET_URL = 'http://localhost:8080'
 
 def url(url):
-    return '%s/api/people' % TARGET_URL
+    return ''.join((TARGET_URL, url))
+
+TEST_COLLECTION_URL = url('/api/test-people')
 
 class TestSuccessfullyPost(TestCase):
     @classmethod
     def setUpClass(cls):
         data = {'name': 'Alice'}
         cls.response = requests.post(
-            url('/api/people'),
+            TEST_COLLECTION_URL,
             data=json.dumps(data),
             headers={
                 'content-type': 'application/json'
@@ -56,3 +58,43 @@ class TestSuccessfullyPost(TestCase):
 
     def test_posted_value(self):
         self.json_response['name'].should.equal('Alice')
+
+class TestPostInvalidBody(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        data = '..A..B..'
+        cls.response = requests.post(
+            TEST_COLLECTION_URL,
+            data=data,
+            headers={
+                'content-type': 'application/json'
+            })
+
+    def test_status_code(self):
+        self.response.status_code.should.equal(422)
+
+class TestPostEmbeddedBody(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        data = {
+            'name': 'wilson',
+            'address': {
+                'state': 'RJ', 'City': 'Rio de Janeiro'
+        }}
+
+        cls.response = requests.post(
+            TEST_COLLECTION_URL,
+            data=json.dumps(data),
+            headers={
+                'content-type': 'application/json'
+            })
+
+        cls.json_response = cls.response.json()
+
+    def test_status_code(self):
+        self.response.status_code.should.equal(201)
+
+    def test_embbedded_value(self):
+        self.json_response['address'].should.equal({
+            'state': 'RJ', 'City': 'Rio de Janeiro'
+        })

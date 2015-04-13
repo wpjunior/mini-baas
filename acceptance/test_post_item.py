@@ -4,23 +4,18 @@ import requests
 import json
 import sure
 import re
+import urls
 UUID4_HEX = re.compile('[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z', re.I)
 
 from unittest import TestCase, skip
 
-TARGET_URL = 'http://localhost:8080'
 
-def url(url):
-    return ''.join((TARGET_URL, url))
-
-TEST_COLLECTION_URL = url('/api/test-people')
-
-class TestSuccessfullyPost(TestCase):
+class TestSuccessfullyPOST(TestCase):
     @classmethod
     def setUpClass(cls):
-        data = {'name': 'Alice'}
+        data = {'name': 'POST Alice'}
         cls.response = requests.post(
-            TEST_COLLECTION_URL,
+            urls.TEST_COLLECTION_URL,
             data=json.dumps(data),
             headers={
                 'content-type': 'application/json'
@@ -33,14 +28,14 @@ class TestSuccessfullyPost(TestCase):
 
     @skip("future feature")
     def test_schema_link_header(self):
-        schema_url = url('/api/item-schema/people')
+        schema_url = urls.TEST_ITEM_SCHEMA_URL
         self.response.headers['link'].should.equal(schema_url)
         self.response.headers['content_type'].should.equal(
             'application/json; charset=utf-8; profile="%s"' % schema_url)
 
     @skip("future feature")
     def test_location_header(self):
-        location_url = url('/api/people/%s' % self.json_response['id'])
+        location_url = urls.test_resource_url(self.json_response['id'])
         self.response.headers['location'].should.equal(location_url)
 
     @skip("future feature")
@@ -57,14 +52,15 @@ class TestSuccessfullyPost(TestCase):
             r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
     def test_posted_value(self):
-        self.json_response['name'].should.equal('Alice')
+        self.json_response['name'].should.equal('POST Alice')
+
 
 class TestPostInvalidBody(TestCase):
     @classmethod
     def setUpClass(cls):
         data = '..A..B..'
         cls.response = requests.post(
-            TEST_COLLECTION_URL,
+            urls.TEST_COLLECTION_URL,
             data=data,
             headers={
                 'content-type': 'application/json'
@@ -72,6 +68,7 @@ class TestPostInvalidBody(TestCase):
 
     def test_status_code(self):
         self.response.status_code.should.equal(422)
+
 
 class TestPostEmbeddedBody(TestCase):
     @classmethod
@@ -83,7 +80,7 @@ class TestPostEmbeddedBody(TestCase):
         }}
 
         cls.response = requests.post(
-            TEST_COLLECTION_URL,
+            urls.TEST_COLLECTION_URL,
             data=json.dumps(data),
             headers={
                 'content-type': 'application/json'

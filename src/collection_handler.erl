@@ -1,9 +1,4 @@
-%% Feel free to use, reuse and abuse the code in this file.
-
-%% @doc Hello world handler.
 -module(collection_handler).
-
-
 
 -export([init/2]).
 -export([content_types_provided/2]).

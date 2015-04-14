@@ -95,3 +95,25 @@ class TestPostEmbeddedBody(TestCase):
         self.json_response['address'].should.equal({
             'state': 'RJ', 'City': 'Rio de Janeiro'
         })
+
+class TestPOSTWithCustomId(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        data = {'id': 'my-custom-body', 'name': 'wilson'}
+
+        cls.response = requests.post(
+            urls.TEST_COLLECTION_URL,
+            data=json.dumps(data),
+            headers={
+                'content-type': 'application/json'
+            })
+
+        cls.json_response = cls.response.json()
+
+    def test_status_code(self):
+        self.response.status_code.should.equal(201)
+
+    def test_json_response_value(self):
+        self.json_response.should.equal({
+            'id': 'my-custom-body', 'name': 'wilson'
+        })

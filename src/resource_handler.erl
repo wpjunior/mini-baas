@@ -20,7 +20,7 @@ handle(<<"PUT">>,  MongoConnection, CollectionName, Pk, Req, Opts)->
         {ok, UpdateAttributes} ->
             put_response_from_mongo(MongoConnection, CollectionName, Pk, Req, UpdateAttributes, Opts);
         {invalid_json, _} ->
-            build_422_response(Req, Opts)
+            responses:invalid_json(Req, Opts)
     end;
 
 handle(<<"DELETE">>, MongoConnection, CollectionName, Pk, Req, Opts)->
@@ -32,7 +32,7 @@ handle(<<"DELETE">>, MongoConnection, CollectionName, Pk, Req, Opts)->
             {ok, Resp, Opts};
 
         true ->
-            build_404_response(Req, Opts)
+            responses:not_found(Req, Opts)
 
     end;
 
@@ -41,7 +41,7 @@ handle(_, _, _, _, Req, Opts)->
     {ok, Resp, Opts}.
 
 get_response_from_mongo({}, Req, Opts) ->
-    build_404_response(Req, Opts);
+    responses:not_found(Req, Opts);
 
 get_response_from_mongo({Document}, Req, Opts) ->
     JsonResp = jiffy:encode(resource_object:to_json(Document)),
@@ -59,7 +59,6 @@ put_response_from_mongo(MongoConnection, CollectionName, Pk, Req, UpdateAttribut
             ok = mongo:update(MongoConnection, CollectionName, {'_id', Pk}, UpdateCommand),
 
             UpdatedDocument = bson:merge(UpdateAttributes, CurrentDocument),
-            io:format("UpdatedDocument: ~p\n", [UpdatedDocument]),
             JsonResp = jiffy:encode(resource_object:to_json(UpdatedDocument)),
             Resp = cowboy_req:reply(200, [
                                           {<<"content-type">>, <<"application/json">>}
@@ -67,14 +66,6 @@ put_response_from_mongo(MongoConnection, CollectionName, Pk, Req, UpdateAttribut
             {ok, Resp, Opts};
 
         true ->
-            build_404_response(Req, Opts)
+            responses:not_found(Req, Opts)
 
     end.
-
-build_404_response(Req, Opts) ->
-    Resp = cowboy_req:reply(404, Req),
-    {ok, Resp, Opts}.
-
-build_422_response(Req, Opts) ->
-    Resp = cowboy_req:reply(422, Req),
-    {ok, Resp, Opts}.

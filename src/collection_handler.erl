@@ -8,8 +8,7 @@ init(Req, [MongoConnection]) ->
     handle(Method, MongoConnection, CollectionName, Req).
 
 handle(<<"GET">>, MongoConnection, _, Req) ->
-    Resp = cowboy_req:reply(404, Req),
-    {ok, Resp, [MongoConnection]};
+    responses:not_found(Req, [MongoConnection]);
 
 handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),
@@ -18,12 +17,11 @@ handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
         {ok, Resource} ->
             insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource);
         {invalid_json, _} ->
-            invalid_json_response(MongoConnection, Req)
+            responses:invalid_json(Req, [MongoConnection])
     end;
 
 handle(_, MongoConnection, _, Req)->
-    Resp = cowboy_req:reply(405, Req),
-    {ok, Resp, [MongoConnection]}.
+    responses:method_not_allowed(Req, [MongoConnection]).
 
 insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource) ->
     ResourceWithPrimaryKey = insert_primary_key_if_necessary(Resource),
@@ -45,7 +43,3 @@ insert_primary_key_if_necessary(Resource) ->
         _ ->
             Resource
     end.
-
-invalid_json_response(MongoConnection, Req) ->
-    Resp = cowboy_req:reply(422, Req),
-    {ok, Resp, [MongoConnection]}.

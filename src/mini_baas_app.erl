@@ -16,7 +16,7 @@ start(_Type, _Args) ->
     Dispatch = cowboy_router:compile([
         {'_', [
                {"/api/:collection_name", collection_handler, [MongoConnection]},
-               {"/api/:collection_name/:pk", resource_handler, [MongoConnection]}
+               {"/api/:collection_name/:id", resource_handler, [MongoConnection]}
               ]}
        ]),
     {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [

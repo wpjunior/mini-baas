@@ -10,7 +10,7 @@ to_json(BsonDocument, PrimaryKeyName) ->
     BsonDocumentWithOutPrimaryKey = bson:exclude(['_id'], BsonDocument),
 
     {TailConvertedDocument} = recursive_convert_to_json(BsonDocumentWithOutPrimaryKey),
-    {[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}.
+    jiffy:encode({[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}).
 
 from_json(JsonDocument) ->
     from_json(JsonDocument, id).

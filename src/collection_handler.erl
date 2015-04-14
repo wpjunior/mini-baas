@@ -25,5 +25,5 @@ handle(_, MongoConnection, _, Req)->
 
 insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource) ->
     ResourceWithPrimaryKey = database:insert(MongoConnection, CollectionName, Resource),
-    JsonBody = jiffy:encode(resource_object:to_json(ResourceWithPrimaryKey)),
+    JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
     responses:json_created(Req, [MongoConnection], JsonBody).

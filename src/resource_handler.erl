@@ -12,7 +12,7 @@ init(Req, Opts) ->
 handle(<<"GET">>,  MongoConnection, CollectionName, Id, Req, Opts)->
     case database:find_by_id(MongoConnection, CollectionName, Id) of
         {ok, Document} ->
-            JsonBody = jiffy:encode(resource_object:to_json(Document)),
+            JsonBody = resource_object:to_json(Document),
             responses:json_success(Req, Opts, JsonBody);
 
         {not_found, _} ->
@@ -26,7 +26,7 @@ handle(<<"PUT">>, MongoConnection, CollectionName, Id, Req, Opts)->
         {ok, Attributes} ->
             case database:update_attributes(MongoConnection, CollectionName, Id, Attributes) of
                 {ok, Document} ->
-                    JsonBody = jiffy:encode(resource_object:to_json(Document)),
+                    JsonBody = resource_object:to_json(Document),
                     responses:json_success(Req, Opts, JsonBody);
 
                 {not_found, _} ->

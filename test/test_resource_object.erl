@@ -2,26 +2,22 @@
 -include_lib("eunit/include/eunit.hrl").
 
 to_json_one_depth_test() ->
-    ?assertEqual({[{id, "123"}, {name, "wilson"}]},
-                 resource_object:to_json({'_id', "123", name, "wilson"})).
+    Json = <<"{\"id\":\"123\",\"name\":\"wilson\"}">>,
+    ?assertEqual(resource_object:to_json({'_id', <<"123">>, name, <<"wilson">>}), Json).
 
 to_json_two_depth_test() ->
-    InputEmbeddedField = {field1, "321", field2, 3},
-    ExpectedEmbeddedField = {[{field1, "321"}, {field2, 3}]},
-    ?assertEqual({[{id, "123"}, {name, "wilson"}, {second, ExpectedEmbeddedField}]},
-                 resource_object:to_json({'_id', "123", name, "wilson",
-                                            second, InputEmbeddedField})).
+    Input = {'_id', <<"123">>, name, <<"wilson">>, second, {field1, <<"321">>, field2, 3}},
+    Json = <<"{\"id\":\"123\",\"name\":\"wilson\",\"second\":{\"field1\":\"321\",\"field2\":3}}">>,
+    ?assertEqual(resource_object:to_json(Input), Json).
 
 to_json_one_depth_with_custom_primary_key_test() ->
-    ?assertEqual({[{slug, "123"}, {name, "wilson"}]},
-                 resource_object:to_json({'_id', "123", name, "wilson"}, slug)).
+    Json = <<"{\"slug\":\"123\",\"name\":\"wilson\"}">>,
+    ?assertEqual(resource_object:to_json({'_id', <<"123">>, name, <<"wilson">>}, slug), Json).
 
 to_json_two_depth_with_custom_primary_key_test() ->
-    InputEmbeddedField = {field1, "321", field2, 3},
-    ExpectedEmbeddedField = {[{field1, "321"}, {field2, 3}]},
-    ?assertEqual({[{customId, "123"}, {name, "wilson"}, {second, ExpectedEmbeddedField}]},
-                 resource_object:to_json({'_id', "123", name, "wilson",
-                                            second, InputEmbeddedField}, customId)).
+    Input = {'_id', <<"123">>, name, <<"wilson">>, second, {field1, <<"321">>, field2, 3}},
+    Json = <<"{\"customId\":\"123\",\"name\":\"wilson\",\"second\":{\"field1\":\"321\",\"field2\":3}}">>,
+    ?assertEqual(resource_object:to_json(Input, customId), Json).
 
 from_json_one_depth_test() ->
     Json = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,

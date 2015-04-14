@@ -14,15 +14,14 @@ class TestSuccessfullyGET(TestCase):
     @classmethod
     def setUpClass(cls):
         data = {'name': 'GET Alice'}
-        post_json_response = requests.post(
+        item = requests.post(
             urls.TEST_COLLECTION_URL,
             data=json.dumps(data),
             headers={
                 'content-type': 'application/json'
             }).json()
 
-        pk = post_json_response['id']
-        cls.response = requests.get(urls.test_resource_url(pk))
+        cls.response = requests.get(urls.test_resource_url(item['id']))
         cls.json_response = cls.response.json()
 
     def test_status_code(self):

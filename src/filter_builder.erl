@@ -1,5 +1,5 @@
 -module(filter_builder).
--export([build_from_querystring/1, where/1, per_page/1, page/1]).
+-export([build_from_req/1, build_from_querystring/1, where/1, per_page/1, page/1]).
 
 -define(PER_PAGE_DEFAULT, 10).
 -define(PER_PAGE_MAX, 1000).
@@ -7,6 +7,10 @@
 -record(filter, {
     where, per_page, page
 }).
+
+build_from_req(Req) ->
+    QueryString = cowboy_req:qs(Req),
+    build_from_querystring(QueryString).
 
 build_from_querystring(QueryString) ->
     ParsedQueryString = qsp:decode(QueryString),

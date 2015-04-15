@@ -19,6 +19,15 @@ to_json_two_depth_with_custom_primary_key_test() ->
     Json = <<"{\"customId\":\"123\",\"name\":\"wilson\",\"second\":{\"field1\":\"321\",\"field2\":3}}">>,
     ?assertEqual(resource_object:to_json(Input, customId), Json).
 
+to_json_list_test() ->
+    Input = [{'_id', <<"123">>, name, <<"wilson">>},
+             {'_id', <<"321">>, name, <<"tayza">>}],
+
+    Json = <<"{\"items\":[{\"id\":\"123\",\"name\":\"wilson\"},{\"id\":\"321\",\"name\":\"tayza\"}]}">>,
+    Output = resource_object:to_json_list(Input),
+
+    ?assertEqual(Output, Json).
+
 from_json_one_depth_test() ->
     Json = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,
     {ReturnAtom, BsonDocument} = resource_object:from_json(Json),

@@ -5,12 +5,15 @@ RELX_CONFIG ?= $(CURDIR)/relx.config
 BUILD_BIN = ./_rel/mini_baas_release/bin/mini_baas_release
 export RELX
 
-run: relx-rel
+run: build relx-rel
 	$(BUILD_BIN) foreground
+
+build:
+	./rebar co
 
 setup:
 	./rebar g-d
-	./rebar co
+	make build
 
 test:
 	./rebar eu

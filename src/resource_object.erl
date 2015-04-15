@@ -1,16 +1,19 @@
 -module(resource_object).
--export([to_json/1, to_json/2,
+-export([to_json/1, to_json/2, to_json_list/1, to_json_list/2,
          from_json/1, from_json/2]).
 
 to_json(BsonDocument) ->
     to_json(BsonDocument, id).
 
 to_json(BsonDocument, PrimaryKeyName) ->
-    {PrimaryKeyValue} = bson:lookup('_id', BsonDocument),
-    BsonDocumentWithOutPrimaryKey = bson:exclude(['_id'], BsonDocument),
+    jiffy:encode(bson_to_json_structure(BsonDocument, PrimaryKeyName)).
 
-    {TailConvertedDocument} = recursive_convert_to_json(BsonDocumentWithOutPrimaryKey),
-    jiffy:encode({[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}).
+to_json_list(BsonDocuments) ->
+    to_json_list(BsonDocuments, id).
+
+to_json_list(BsonDocuments, PrimaryKeyName) ->
+    Items = [bson_to_json_structure(Doc, PrimaryKeyName) || Doc <- BsonDocuments],
+    jiffy:encode({[{items, Items}]}).
 
 from_json(JsonDocument) ->
     from_json(JsonDocument, id).
@@ -23,6 +26,14 @@ from_json(JsonDocument, PrimaryKeyName) when is_binary(JsonDocument)->
         _ ->
             {invalid_json, undefined}
     end.
+
+bson_to_json_structure(BsonDocument, PrimaryKeyName) ->
+    {PrimaryKeyValue} = bson:lookup('_id', BsonDocument),
+    BsonDocumentWithOutPrimaryKey = bson:exclude(['_id'], BsonDocument),
+
+    {TailConvertedDocument} = recursive_convert_to_json(BsonDocumentWithOutPrimaryKey),
+    {[{PrimaryKeyName, PrimaryKeyValue} | TailConvertedDocument]}.
+
 
 json_decoded_to_bson(JsonDocumentDecoded, PrimaryKeyName) ->
     PrimaryKeyNameBinary = erlang:atom_to_binary(PrimaryKeyName, unicode),

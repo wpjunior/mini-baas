@@ -7,23 +7,25 @@ init(Req, [MongoConnection]) ->
     [{collection_name, CollectionName}] = cowboy_req:bindings(Req),
     handle(Method, MongoConnection, CollectionName, Req).
 
-handle(<<"GET">>, MongoConnection, _, Req) ->
-    responses:not_found(Req, [MongoConnection]);
+handle(<<"GET">>, MongoConnection, CollectionName, Req) ->
+    Filter = filter_builder:build_from_req(Req),
+    Where = filter_builder:where(Filter),
+    Result = database:find(MongoConnection, CollectionName, Where),
+    JsonBody = resource_object:to_json_list(Result),
+    responses:json_success(Req, [MongoConnection], JsonBody);
 
 handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),
 
     case resource_object:from_json(Body) of
         {ok, Resource} ->
-            insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource);
+            ResourceWithPrimaryKey = database:insert(MongoConnection, CollectionName, Resource),
+            JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
+            responses:json_created(Req, [MongoConnection], JsonBody);
+
         {invalid_json, _} ->
             responses:invalid_json(Req, [MongoConnection])
     end;
 
 handle(_, MongoConnection, _, Req)->
     responses:method_not_allowed(Req, [MongoConnection]).
-
-insert_resource_in_collection(MongoConnection, CollectionName, Req, Resource) ->
-    ResourceWithPrimaryKey = database:insert(MongoConnection, CollectionName, Resource),
-    JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
-    responses:json_created(Req, [MongoConnection], JsonBody).

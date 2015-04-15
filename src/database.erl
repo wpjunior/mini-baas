@@ -1,6 +1,7 @@
 -module(database).
 
--export([find_by_id/3, exists/3, delete_by_id/3, update_attributes/4, insert/3]).
+-export([find_by_id/3, exists/3, delete_by_id/3, update_attributes/4, insert/3,
+         find/3]).
 
 find_by_id(MongoConnection, CollectionName, Id) ->
     case mongo:find_one(MongoConnection, CollectionName, {'_id', Id}) of
@@ -51,3 +52,9 @@ insert_primary_key_if_necessary(Resource) ->
         _ ->
             Resource
     end.
+
+find(MongoConnection, CollectionName, Where) ->
+    Cursor = mongo:find(MongoConnection, CollectionName, Where),
+    Result = mc_cursor:rest(Cursor),
+    mc_cursor:close(Cursor),
+    Result.

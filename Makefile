@@ -1,17 +1,12 @@
 .PHONY: test
-PROJECT = mini_baas
-DEPS = cowboy eredis mongodb jiffy uuid
 
-dep_jiffy = git https://github.com/davisp/jiffy master
-dep_cowboy = git https://github.com/ninenines/cowboy master
-dep_eredis = git https://github.com/wooga/eredis master
-dep_mongodb = git https://github.com/comtihon/mongodb-erlang master
-dep_uuid = git https://github.com/avtobiff/erlang-uuid master
+RELX ?= $(CURDIR)/relx
+RELX_CONFIG ?= $(CURDIR)/relx.config
+BUILD_BIN = ./_rel/mini_baas_release/bin/mini_baas_release
+export RELX
 
-include erlang.mk
-
-run: all
-	./_rel/mini_baas/bin/mini_baas foreground
+run: relx-rel
+	$(BUILD_BIN) foreground
 
 setup:
 	./rebar g-d
@@ -26,3 +21,6 @@ test:
 
 test_acceptance: .virtualenv
 	./.virtualenv/bin/nosetests -s acceptance
+
+relx-rel: $(RELX)
+	@$(RELX) -c $(RELX_CONFIG) $(RELX_OPTS)

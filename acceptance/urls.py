@@ -12,6 +12,9 @@ def resource_url(collection_name, pk):
 def item_schema_url(collection_name):
     return resource_url('item-schemas', collection_name)
 
+
+ITEM_SCHEMAS_URL = collection_url('item-schemas')
+
 TEST_COLLECTION_NAME = 'test-people'
 TEST_COLLECTION_URL = collection_url(TEST_COLLECTION_NAME)
 TEST_ITEM_SCHEMA_URL = item_schema_url(TEST_COLLECTION_NAME)

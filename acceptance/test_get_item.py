@@ -10,7 +10,7 @@ UUID4_HEX = re.compile('[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z', re.I)
 from unittest import TestCase, skip
 
 
-class TestSuccessfullyGET(TestCase):
+class TestSuccessfully(TestCase):
     @classmethod
     def setUpClass(cls):
         data = {'name': 'GET Alice'}

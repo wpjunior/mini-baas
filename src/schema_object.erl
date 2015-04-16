@@ -31,10 +31,11 @@ convert_schema_link(BsonDocument) ->
 
 bson_update_label(OldLabel, NewLabel, BsonDocument) ->
     case bson:lookup(OldLabel, BsonDocument, undefined) of
+        undefined ->
+            BsonDocument;
+
         Value ->
             BsonDocumentWithLabel = bson:exclude([OldLabel], BsonDocument),
-            bson:update(NewLabel, Value, BsonDocumentWithLabel);
+            bson:update(NewLabel, Value, BsonDocumentWithLabel)
 
-        undefined ->
-            BsonDocument
     end.

@@ -15,6 +15,7 @@ start(_Type, _Args) ->
 
     Dispatch = cowboy_router:compile([
         {'_', [
+               {"/api/item-schemas", item_schemas_collection_handler, [MongoConnection]},
                {"/api/:collection_name", collection_handler, [MongoConnection]},
                {"/api/:collection_name/:id", resource_handler, [MongoConnection]}
               ]}

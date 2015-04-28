@@ -9,12 +9,16 @@ init(Req, [MongoConnection]) ->
 
 
 handle(<<"GET">>, MongoConnection, CollectionName, Req) ->
-    Filter = filter_builder:build_from_req(Req),
-    Where = filter_builder:where(Filter),
-    Result = database:find(MongoConnection, CollectionName, Where),
-    JsonBody = resource_object:to_json_list(Result),
-    responses:json_success(Req, [MongoConnection], JsonBody);
-
+    case schema_service:schema_is_found(CollectionName) of
+        true ->
+            Filter = filter_builder:build_from_req(Req),
+            Where = filter_builder:where(Filter),
+            Result = database:find(MongoConnection, CollectionName, Where),
+            JsonBody = resource_object:to_json_list(Result),
+            responses:json_success(Req, [MongoConnection], JsonBody);
+        false ->
+            responses:not_found(Req, [MongoConnection])
+    end;
 
 handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),

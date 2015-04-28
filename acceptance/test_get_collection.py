@@ -12,6 +12,17 @@ from unittest import TestCase, skip
 class TestSuccessfully(TestCase):
     @classmethod
     def setUpClass(cls):
+        schema = {
+            '$schema': 'http://json-schema.org/draft-03/hyper-schema#',
+            'collectionName': urls.TEST_COLLECTION_NAME
+        }
+        requests.post(
+            urls.collection_url('item-schemas'),
+            data=json.dumps(schema),
+            headers={
+                'content-type': 'application/json'
+            })
+
         data = {'name': 'Alice (Get Collection)'}
         requests.post(
             urls.TEST_COLLECTION_URL,
@@ -79,3 +90,11 @@ class TestWithWhereFilter(TestCase):
     def test_include_items(self):
         names = set([item['name'] for item in self.json_response['items']])
         names.should.have.length_of(1)
+
+class TestCollectionNameNotFound(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.response = requests.get(urls.collection_url('test-people-404'))
+
+    def test_status_code(self):
+        self.response.status_code.should.equal(404)

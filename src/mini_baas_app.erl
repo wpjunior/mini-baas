@@ -12,6 +12,7 @@ start(_Type, _Args) ->
     application:start (mongodb),
 
     {ok, MongoConnection} = mongo:connect (<<"test">>),
+    {ok, _} = schema_service:start_link(MongoConnection),
 
     Dispatch = cowboy_router:compile([
         {'_', [
@@ -22,8 +23,14 @@ start(_Type, _Args) ->
               ]}
        ]),
     {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [
-                                                            {env, [{dispatch, Dispatch}]}
-                                                           ]),
+        {env, [{dispatch, Dispatch}]},
+
+        {middlewares, [
+                       cowboy_router,
+                       collection_name_middleware,
+                       cowboy_handler
+                      ]}
+    ]),
     mini_baas_sup:start_link().
 
 stop(_State) ->

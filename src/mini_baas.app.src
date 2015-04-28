@@ -11,7 +11,8 @@
                 mongodb,
                 jiffy,
                 uuid,
-                qsp
+                qsp,
+                jesse
         ]},
 	{mod, {mini_baas_app, []}},
 	{env, []}

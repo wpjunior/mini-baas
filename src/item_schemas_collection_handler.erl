@@ -14,7 +14,7 @@ handle(<<"GET">>, Req, Opts) ->
     Filter = filter_builder:build_from_req(Req),
     Where = filter_builder:where(Filter),
 
-    Result = database:find(MongoConnection, ?ITEM_SCHEMA_COLLECTION, Where),
+    Result = database_service:find(?ITEM_SCHEMA_COLLECTION, Where),
     JsonBody = schema_object:to_json_list(Result),
 
     responses:json_success(Req, [MongoConnection], JsonBody);
@@ -26,7 +26,7 @@ handle(<<"POST">>, Req, Opts) ->
 
     case schema_object:from_json(Body) of
         {ok, Schema} ->
-            database:insert(MongoConnection, ?ITEM_SCHEMA_COLLECTION, Schema),
+            database_service:insert(?ITEM_SCHEMA_COLLECTION, Schema),
             JsonBody = schema_object:to_json(Schema),
             responses:json_created(Req, Opts, JsonBody);
 

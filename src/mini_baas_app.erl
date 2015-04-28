@@ -10,7 +10,7 @@
 start(_Type, _Args) ->
     application:start (bson),
     application:start (mongodb),
-
+    database_service:init(),
     {ok, MongoConnection} = mongo:connect (<<"test">>),
     {ok, _} = schema_service:start_link(MongoConnection),
 

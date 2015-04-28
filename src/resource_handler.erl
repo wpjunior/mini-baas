@@ -9,27 +9,27 @@ init(Req, Opts) ->
 
     handle(Method, MongoConnection, CollectionName, Id, Req, Opts).
 
-handle(<<"GET">>,  MongoConnection, CollectionName, Id, Req, Opts)->
-    case database:find_by_id(MongoConnection, CollectionName, Id) of
+handle(<<"GET">>, _MongoConnection, CollectionName, Id, Req, Opts)->
+    case database_service:find_by_id(CollectionName, Id) of
         {ok, Document} ->
             JsonBody = resource_object:to_json(Document),
             responses:json_success(Req, Opts, JsonBody);
 
-        {not_found, _} ->
+        not_found ->
             responses:not_found(Req, Opts)
     end;
 
-handle(<<"PUT">>, MongoConnection, CollectionName, Id, Req, Opts)->
+handle(<<"PUT">>, _MongoConnection, CollectionName, Id, Req, Opts)->
     {ok, Body, _} = cowboy_req:body(Req),
 
     case resource_object:from_json(Body) of
         {ok, Attributes} ->
-            case database:update_attributes(MongoConnection, CollectionName, Id, Attributes) of
+            case database_service:update_attributes(CollectionName, Id, Attributes) of
                 {ok, Document} ->
                     JsonBody = resource_object:to_json(Document),
                     responses:json_success(Req, Opts, JsonBody);
 
-                {not_found, _} ->
+                not_found ->
                     responses:not_found(Req, Opts)
 
             end;
@@ -38,8 +38,8 @@ handle(<<"PUT">>, MongoConnection, CollectionName, Id, Req, Opts)->
             responses:invalid_json(Req, Opts)
     end;
 
-handle(<<"DELETE">>, MongoConnection, CollectionName, Id, Req, Opts) ->
-    case database:delete_by_id(MongoConnection, CollectionName, Id) of
+handle(<<"DELETE">>, _MongoConnection, CollectionName, Id, Req, Opts) ->
+    case database_service:delete_by_id(CollectionName, Id) of
         ok ->
             responses:no_content(Req, Opts);
         not_found ->

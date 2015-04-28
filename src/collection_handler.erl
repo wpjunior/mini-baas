@@ -13,7 +13,7 @@ handle(<<"GET">>, MongoConnection, CollectionName, Req) ->
         true ->
             Filter = filter_builder:build_from_req(Req),
             Where = filter_builder:where(Filter),
-            Result = database:find(MongoConnection, CollectionName, Where),
+            Result = database_service:find(CollectionName, Where),
             JsonBody = resource_object:to_json_list(Result),
             responses:json_success(Req, [MongoConnection], JsonBody);
         false ->
@@ -25,7 +25,7 @@ handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
 
     case resource_object:from_json(Body) of
         {ok, Resource} ->
-            ResourceWithPrimaryKey = database:insert(MongoConnection, CollectionName, Resource),
+            ResourceWithPrimaryKey = database_service:insert(CollectionName, Resource),
             JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
             responses:json_created(Req, [MongoConnection], JsonBody);
 

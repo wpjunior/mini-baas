@@ -22,10 +22,10 @@ init(MongoConnection) ->
     {ok, State}.
 
 handle_call({schema_is_found, CollectionName}, _From, State) ->
-    case database:find_by_id(State#service_state.mongo_connection, ?ITEM_SCHEMA_COLLECTION, CollectionName) of
+    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
         {ok, _} ->
             {reply, true, State};
-        {not_found, undefined} ->
+        not_found ->
             {reply, false, State}
     end.
 

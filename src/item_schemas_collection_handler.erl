@@ -9,20 +9,17 @@ init(Req, Opts) ->
 
 
 handle(<<"GET">>, Req, Opts) ->
-    [MongoConnection] = Opts,
-
     Filter = filter_builder:build_from_req(Req),
     Where = filter_builder:where(Filter),
 
     Result = database_service:find(?ITEM_SCHEMA_COLLECTION, Where),
     JsonBody = schema_object:to_json_list(Result),
 
-    responses:json_success(Req, [MongoConnection], JsonBody);
+    responses:json_success(Req, Opts, JsonBody);
 
 
 handle(<<"POST">>, Req, Opts) ->
     {ok, Body, _} = cowboy_req:body(Req),
-    [MongoConnection] = Opts,
 
     case schema_object:from_json(Body) of
         {ok, Schema} ->

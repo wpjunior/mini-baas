@@ -10,16 +10,16 @@
 start(_Type, _Args) ->
     application:start (bson),
     application:start (mongodb),
+
     database_service:init(),
-    {ok, MongoConnection} = mongo:connect (<<"test">>),
-    {ok, _} = schema_service:start_link(MongoConnection),
+    {ok, _} = schema_service:start_link(),
 
     Dispatch = cowboy_router:compile([
         {'_', [
-               {"/api/item-schemas", item_schemas_collection_handler, [MongoConnection]},
-               {"/api/item-schemas/:collection_name", item_schemas_resource_handler, [MongoConnection]},
-               {"/api/:collection_name", collection_handler, [MongoConnection]},
-               {"/api/:collection_name/:id", resource_handler, [MongoConnection]}
+               {"/api/item-schemas", item_schemas_collection_handler, []},
+               {"/api/item-schemas/:collection_name", item_schemas_resource_handler, []},
+               {"/api/:collection_name", collection_handler, []},
+               {"/api/:collection_name/:id", resource_handler, []}
               ]}
        ]),
     {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [

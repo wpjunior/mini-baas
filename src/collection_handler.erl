@@ -2,37 +2,37 @@
 -export([init/2]).
 
 
-init(Req, [MongoConnection]) ->
+init(Req, Opts) ->
     Method = cowboy_req:method(Req),
     [{collection_name, CollectionName}] = cowboy_req:bindings(Req),
-    handle(Method, MongoConnection, CollectionName, Req).
+    handle(Method, CollectionName, Req, Opts).
 
 
-handle(<<"GET">>, MongoConnection, CollectionName, Req) ->
+handle(<<"GET">>, CollectionName, Req, Opts) ->
     case schema_service:schema_is_found(CollectionName) of
         true ->
             Filter = filter_builder:build_from_req(Req),
             Where = filter_builder:where(Filter),
             Result = database_service:find(CollectionName, Where),
             JsonBody = resource_object:to_json_list(Result),
-            responses:json_success(Req, [MongoConnection], JsonBody);
+            responses:json_success(Req, Opts, JsonBody);
         false ->
-            responses:not_found(Req, [MongoConnection])
+            responses:not_found(Req, Opts)
     end;
 
-handle(<<"POST">>, MongoConnection, CollectionName, Req) ->
+handle(<<"POST">>, CollectionName, Req, Opts) ->
     {ok, Body, _} = cowboy_req:body(Req),
 
     case resource_object:from_json(Body) of
         {ok, Resource} ->
             ResourceWithPrimaryKey = database_service:insert(CollectionName, Resource),
             JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
-            responses:json_created(Req, [MongoConnection], JsonBody);
+            responses:json_created(Req, Opts, JsonBody);
 
         {invalid_json, _} ->
-            responses:invalid_json(Req, [MongoConnection])
+            responses:invalid_json(Req, Opts)
     end;
 
 
-handle(_, MongoConnection, _, Req)->
-    responses:method_not_allowed(Req, [MongoConnection]).
+handle(_, _, Req, Opts)->
+    responses:method_not_allowed(Req, Opts).

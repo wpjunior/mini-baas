@@ -4,7 +4,8 @@
 init_connection() ->
     application:start(bson),
     application:start(mongodb),
-    database_service:init().
+    database_service:init(),
+    ok.
 
 end_connection() ->
     application:stop(mongodb),

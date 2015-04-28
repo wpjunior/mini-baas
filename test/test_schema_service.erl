@@ -4,25 +4,26 @@
 init_connection() ->
     application:start(bson),
     application:start(mongodb),
-    {ok, MongoConnection} = mongo:connect (<<"mini-bass-test">>),
-    {ok, SchemaServicePid} = schema_service:start_link(MongoConnection),
-    {MongoConnection, SchemaServicePid}.
+    database_service:init(),
+    schema_service:start_link(),
+    ok.
 
 end_connection() ->
-  application:stop(mongodb),
-  application:stop(bson),
-  schema_service:stop(),
-  ok.
+    application:stop(mongodb),
+    application:stop(bson),
+    database_service:stop(),
+    schema_service:stop(),
+    ok.
 
 no_exists_test() ->
-    {_, SchemaServicePid} = init_connection(),
+    init_connection(),
     Exists = schema_service:schema_is_found(<<"test">>),
     ?assertEqual(Exists, false),
     end_connection().
 
 exists_test() ->
-    {MongoConnection, SchemaServicePid} = init_connection(),
-    database:insert(MongoConnection, <<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', {}}),
+    init_connection(),
+    database_service:insert(<<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', {}}),
     Exists = schema_service:schema_is_found(<<"test-exist">>),
     ?assertEqual(Exists, true),
     end_connection().

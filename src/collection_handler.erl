@@ -7,18 +7,12 @@ init(Req, Opts) ->
     [{collection_name, CollectionName}] = cowboy_req:bindings(Req),
     handle(Method, CollectionName, Req, Opts).
 
-
 handle(<<"GET">>, CollectionName, Req, Opts) ->
-    case schema_service:schema_is_found(CollectionName) of
-        true ->
-            Filter = filter_builder:build_from_req(Req),
-            Where = filter_builder:where(Filter),
-            Result = database_service:find(CollectionName, Where),
-            JsonBody = resource_object:to_json_list(Result),
-            responses:json_success(Req, Opts, JsonBody);
-        false ->
-            responses:not_found(Req, Opts)
-    end;
+    Filter = filter_builder:build_from_req(Req),
+    Where = filter_builder:where(Filter),
+    Result = database_service:find(CollectionName, Where),
+    JsonBody = resource_object:to_json_list(Result),
+    responses:json_success(Req, Opts, JsonBody);
 
 handle(<<"POST">>, CollectionName, Req, Opts) ->
     {ok, Body, _} = cowboy_req:body(Req),
@@ -32,7 +26,6 @@ handle(<<"POST">>, CollectionName, Req, Opts) ->
         {invalid_json, _} ->
             responses:invalid_json(Req, Opts)
     end;
-
 
 handle(_, _, Req, Opts)->
     responses:method_not_allowed(Req, Opts).

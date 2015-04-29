@@ -26,4 +26,5 @@ exists_test() ->
     database_service:insert(<<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', {}}),
     Exists = schema_service:schema_is_found(<<"test-exist">>),
     ?assertEqual(Exists, true),
+    ok = database_service:delete_by_id(<<"item-schemas">>, <<"test-exist">>),
     end_connection().

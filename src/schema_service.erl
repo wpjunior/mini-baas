@@ -15,12 +15,8 @@ init(_) ->
     {ok, Schemas}.
 
 handle_call({schema_is_found, CollectionName}, _From, Schemas) ->
-    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
-        {ok, _} ->
-            {reply, true, Schemas};
-        not_found ->
-            {reply, false, Schemas}
-    end.
+    {Found, NewSchemas} = handle_schema_is_found(memory, CollectionName, Schemas),
+    {reply, Found, NewSchemas}.
 
 schema_is_found(CollectionName) ->
     gen_server:call(?MODULE, {schema_is_found, CollectionName}).
@@ -33,3 +29,21 @@ handle_cast(stop, Schemas) ->
 
 terminate(normal, _) ->
     ok.
+
+handle_schema_is_found(memory, CollectionName, Schemas) ->
+    case gb_trees:is_defined(CollectionName, Schemas) of
+        true ->
+            {true, Schemas};
+        false ->
+            handle_schema_is_found(database, CollectionName, Schemas)
+    end;
+
+handle_schema_is_found(database, CollectionName, Schemas) ->
+    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
+        {ok, Document} ->
+            NewSchemas = gb_trees:insert(CollectionName, Document, Schemas),
+            {true, NewSchemas};
+
+        not_found ->
+            {false, Schemas}
+    end.

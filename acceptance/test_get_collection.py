@@ -13,7 +13,7 @@ class TestSuccessfully(TestCase):
     @classmethod
     def setUpClass(cls):
         schema = {
-            '$schema': 'http://json-schema.org/draft-03/hyper-schema#',
+            '$schema': 'http://json-schema.org/draft-03/schema#',
             'collectionName': urls.TEST_COLLECTION_NAME
         }
         requests.post(

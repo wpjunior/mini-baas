@@ -57,7 +57,7 @@ insert_primary_key_if_necessary(Resource) ->
 
     case bson:lookup('_id', Resource, undefined) of
         undefined ->
-            PrimaryKey = erlang:list_to_binary(uuid:to_string(uuid:uuid4())),
+            PrimaryKey = list_to_binary(uuid:to_string(uuid:uuid4())),
             bson:update('_id', PrimaryKey, Resource);
         _ ->
             Resource

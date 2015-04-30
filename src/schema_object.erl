@@ -1,10 +1,15 @@
 -module(schema_object).
--export([from_json/1, to_json/1, to_json_list/1]).
+-export([from_json/1, to_json/1, to_json/2, to_json_list/1]).
 
 
 to_json(BsonDocument) ->
     BsonDocumentUpdated = restore_schema_link(BsonDocument),
     resource_object:to_json(BsonDocumentUpdated, collectionName).
+
+
+to_json(BsonDocument, Format) ->
+    BsonDocumentUpdated = restore_schema_link(BsonDocument),
+    resource_object:to_json(BsonDocumentUpdated, collectionName, Format).
 
 
 to_json_list(BsonDocuments) ->

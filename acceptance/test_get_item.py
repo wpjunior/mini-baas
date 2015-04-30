@@ -13,6 +13,17 @@ from unittest import TestCase, skip
 class TestSuccessfully(TestCase):
     @classmethod
     def setUpClass(cls):
+        schema = {
+            '$schema': 'http://json-schema.org/draft-03/schema#',
+            'collectionName': urls.TEST_COLLECTION_NAME
+        }
+        requests.post(
+            urls.collection_url('item-schemas'),
+            data=json.dumps(schema),
+            headers={
+                'content-type': 'application/json'
+            })
+
         data = {'name': 'GET Alice'}
         item = requests.post(
             urls.TEST_COLLECTION_URL,

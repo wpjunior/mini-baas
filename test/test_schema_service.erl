@@ -24,7 +24,27 @@ no_exists_test() ->
 exists_test() ->
     init_connection(),
     database_service:insert(<<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', {}}),
+    schema_service:reset_cache(),
     Exists = schema_service:schema_is_found(<<"test-exist">>),
     ?assertEqual(Exists, true),
+    ok = database_service:delete_by_id(<<"item-schemas">>, <<"test-exist">>),
+    end_connection().
+
+validation_ok_test() ->
+    init_connection(),
+    Props = {'name', {'type', <<"string">>}},
+    database_service:insert(<<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', Props}),
+    schema_service:reset_cache(),
+    Valid = schema_service:validate(<<"test-exist">>, {[{<<"name">>, <<"my name">>}]}),
+    ?assertEqual(Valid, valid),
+    ok = database_service:delete_by_id(<<"item-schemas">>, <<"test-exist">>),
+    end_connection().
+
+validation_error_test() ->
+    init_connection(),
+    Props = {'name', {'type', <<"string">>}},
+    database_service:insert(<<"item-schemas">>, {'_id', <<"test-exist">>, 'properties', Props, 'type', <<"object">>}),
+    schema_service:reset_cache(),
+    {invalid, Errors} = schema_service:validate(<<"test-exist">>, {[{<<"name">>, 10}]}),
     ok = database_service:delete_by_id(<<"item-schemas">>, <<"test-exist">>),
     end_connection().

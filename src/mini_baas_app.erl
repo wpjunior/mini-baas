@@ -8,8 +8,8 @@
 %% API.
 
 start(_Type, _Args) ->
-    application:start (bson),
-    application:start (mongodb),
+    %% TODO: turn off for production
+    sync:go(),
 
     database_service:init(),
     {ok, _} = schema_service:start_link(),

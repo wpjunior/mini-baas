@@ -5,8 +5,8 @@ RELX_CONFIG ?= $(CURDIR)/relx.config
 BUILD_BIN = ./_rel/mini_baas_release/bin/mini_baas_release
 export RELX
 
-shell:
-	erl -pa ebin/ -pa deps/*/ebin -eval "application:ensure_all_started(mini_baas)"
+run-dev:
+	erl -pa ebin/ -pa deps/*/ebin -eval "application:ensure_all_started(mini_baas)" -eval "sync:go()"
 
 run: build relx-rel
 	$(BUILD_BIN) foreground

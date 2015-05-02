@@ -19,13 +19,16 @@ no_content(Req, Opts) ->
     {ok, Resp, Opts}.
 
 json_success(Req, Opts, JsonBody) ->
+    Body = jiffy:encode(JsonBody),
     Resp = cowboy_req:reply(200, [
         {<<"content-type">>, <<"application/json">>}
-    ], JsonBody, Req),
+    ], Body, Req),
+
     {ok, Resp, Opts}.
 
 json_created(Req, Opts, JsonBody) ->
+    Body = jiffy:encode(JsonBody),
     Resp = cowboy_req:reply(201, [
         {<<"content-type">>, <<"application/json">>}
-    ], JsonBody, Req),
+    ], Body, Req),
     {ok, Resp, Opts}.

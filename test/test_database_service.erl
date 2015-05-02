@@ -15,12 +15,12 @@ end_connection() ->
 
 exists_test() ->
     init_connection(),
-    Exists = database_service:exists(<<"teste">>, <<"123">>),
+    Exists = database_service:exists(<<"teste">>, <<"undefined">>),
     ?assertEqual(Exists, false),
     end_connection().
 
 find_by_id_test() ->
     init_connection(),
-    Response = database_service:find_by_id(<<"teste">>, <<"123">>),
+    Response = database_service:find_by_id(<<"teste">>, <<"undefined">>),
     ?assertEqual(Response, not_found),
     end_connection().

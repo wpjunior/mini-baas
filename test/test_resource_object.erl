@@ -2,32 +2,47 @@
 -include_lib("eunit/include/eunit.hrl").
 
 to_json_one_depth_test() ->
-    Json = <<"{\"id\":\"123\",\"name\":\"wilson\"}">>,
+    Json = {[{<<"id">>, <<"123">>}, {<<"name">>, <<"wilson">>}]},
     ?assertEqual(resource_object:to_json({'_id', <<"123">>, name, <<"wilson">>}), Json).
-
-to_json_structure_test() ->
-    JsonStructure = {[{<<"id">>, <<"123">>}, {<<"name">>, <<"wilson">>}]},
-    ?assertEqual(resource_object:to_json({'_id', <<"123">>, name, <<"wilson">>}, id, structure), JsonStructure).
 
 to_json_two_depth_test() ->
     Input = {'_id', <<"123">>, name, <<"wilson">>, second, {field1, <<"321">>, field2, 3}},
-    Json = <<"{\"id\":\"123\",\"name\":\"wilson\",\"second\":{\"field1\":\"321\",\"field2\":3}}">>,
+    Json = {[
+             {<<"id">>, <<"123">>},
+             {<<"name">>, <<"wilson">>},
+             {<<"second">>, {[
+                              {<<"field1">>, <<"321">>},
+                              {<<"field2">>, 3}
+                             ]
+                 }
+             }
+            ]},
     ?assertEqual(resource_object:to_json(Input), Json).
 
 to_json_one_depth_with_custom_primary_key_test() ->
-    Json = <<"{\"slug\":\"123\",\"name\":\"wilson\"}">>,
+    Json = {[{<<"slug">>, <<"123">>}, {<<"name">>, <<"wilson">>}]},
     ?assertEqual(resource_object:to_json({'_id', <<"123">>, name, <<"wilson">>}, slug), Json).
 
 to_json_two_depth_with_custom_primary_key_test() ->
-    Input = {'_id', <<"123">>, name, <<"wilson">>, second, {field1, <<"321">>, field2, 3}},
-    Json = <<"{\"customId\":\"123\",\"name\":\"wilson\",\"second\":{\"field1\":\"321\",\"field2\":3}}">>,
+    Input = {'_id', <<"123">>, second, {field1, <<"321">>}},
+    Json = {[
+             {<<"customId">>, <<"123">>},
+             {<<"second">>, {[
+                              {<<"field1">>, <<"321">>}
+                             ]}}
+            ]},
     ?assertEqual(resource_object:to_json(Input, customId), Json).
 
 to_json_list_test() ->
     Input = [{'_id', <<"123">>, name, <<"wilson">>},
              {'_id', <<"321">>, name, <<"tayza">>}],
 
-    Json = <<"{\"items\":[{\"id\":\"123\",\"name\":\"wilson\"},{\"id\":\"321\",\"name\":\"tayza\"}]}">>,
+    Json = {[
+             {<<"items">>, [
+                            {[{<<"id">>, <<"123">>}, {<<"name">>, <<"wilson">>}]},
+                            {[{<<"id">>, <<"321">>}, {<<"name">>, <<"tayza">>}]}
+                           ]}
+            ]},
     Output = resource_object:to_json_list(Input),
 
     ?assertEqual(Output, Json).

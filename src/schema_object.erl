@@ -11,13 +11,8 @@ to_json_list(BsonDocuments) ->
     resource_object:to_json_list(BsonDocumentsUpdated, collectionName).
 
 from_json(JsonDocument) ->
-    case resource_object:from_json(JsonDocument, collectionName) of
-        {ok, BsonDocument} ->
-            {ok, convert_schema_link(BsonDocument)};
-        Other ->
-            Other
-    end.
-
+    BsonDocument = resource_object:from_json(JsonDocument, collectionName),
+    convert_schema_link(BsonDocument).
 
 restore_schema_link(BsonDocument) ->
     bson_update_label('%24schema', '$schema', BsonDocument).

@@ -48,44 +48,42 @@ to_json_list_test() ->
     ?assertEqual(Output, Json).
 
 from_json_one_depth_test() ->
-    Json = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,
-    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
-    ?assertEqual(ok, ReturnAtom),
+    Text = <<"{\"id\": \"123\", \"name\": \"wilson\"}">>,
+    {ok, Json} = resource_object:from_string(Text),
+    BsonDocument = resource_object:from_json(Json),
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>}, BsonDocument).
 
 from_json_primary_key_missing_test() ->
-    Json = <<"{\"name\": \"wilson\"}">>,
-    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
-    ?assertEqual(ok, ReturnAtom),
+    Text = <<"{\"name\": \"wilson\"}">>,
+    {ok, Json} = resource_object:from_string(Text),
+    BsonDocument = resource_object:from_json(Json),
     ?assertEqual({name, <<"wilson">>}, BsonDocument).
 
 from_json_two_depth_test() ->
-    Json = <<"{\"id\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    Text = <<"{\"id\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    {ok, Json} = resource_object:from_string(Text),
     ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
-    {ReturnAtom, BsonDocument} = resource_object:from_json(Json),
-    ?assertEqual(ok, ReturnAtom),
+    BsonDocument = resource_object:from_json(Json),
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
                  BsonDocument).
 
 from_json_one_depth_with_custom_primary_key_test() ->
-    Json = <<"{\"slug\": \"123\", \"name\": \"wilson\"}">>,
-    {ReturnAtom, BsonDocument} = resource_object:from_json(Json, slug),
-
-    ?assertEqual(ok, ReturnAtom),
+    Text = <<"{\"slug\": \"123\", \"name\": \"wilson\"}">>,
+    {ok, Json} = resource_object:from_string(Text),
+    BsonDocument = resource_object:from_json(Json, slug),
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>}, BsonDocument).
 
 from_json_two_depth_with_custom_primary_key_test() ->
-    Json = <<"{\"customId\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    Text = <<"{\"customId\": \"123\", \"name\": \"wilson\", \"second\": {\"field1\": \"321\", \"field2\": 3}}">>,
+    {ok, Json} = resource_object:from_string(Text),
     ExpectedEmbeddedField = {field1, <<"321">>, field2, 3},
 
-    {ReturnAtom, BsonDocument} = resource_object:from_json(Json, customId),
-    ?assertEqual(ok, ReturnAtom),
-
+    BsonDocument = resource_object:from_json(Json, customId),
     ?assertEqual({'_id', <<"123">>, name, <<"wilson">>, second, ExpectedEmbeddedField},
                  BsonDocument).
 
-from_json_invalid_json_test() ->
+from_string_invalid_json_test() ->
     Json = <<"{}..A..B..">>,
-    {ReturnAtom, _} = resource_object:from_json(Json),
+    ReturnAtom = resource_object:from_string(Json),
     ?assertEqual(ReturnAtom, invalid_json).

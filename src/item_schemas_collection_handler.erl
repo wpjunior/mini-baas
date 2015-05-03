@@ -21,13 +21,14 @@ handle(<<"GET">>, Req, Opts) ->
 handle(<<"POST">>, Req, Opts) ->
     {ok, Body, _} = cowboy_req:body(Req),
 
-    case schema_object:from_json(Body) of
-        {ok, Schema} ->
+    case resource_object:from_string(Body) of
+        {ok, JsonDocument} ->
+            Schema = schema_object:from_json(JsonDocument),
             database_service:insert(?ITEM_SCHEMA_COLLECTION, Schema),
             JsonBody = schema_object:to_json(Schema),
             responses:json_created(Req, Opts, JsonBody);
 
-        {invalid_json, _} ->
+        invalid_json ->
             responses:invalid_json(Req, Opts)
     end;
 

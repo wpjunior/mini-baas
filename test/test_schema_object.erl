@@ -13,9 +13,9 @@ to_json_without_schema_test() ->
 
 
 from_json_test() ->
-    Json = <<"{\"collectionName\": \"123\", \"$schema\": \"ref\"}">>,
-    {ReturnAtom, BsonDocument} = schema_object:from_json(Json),
-    ?assertEqual(ok, ReturnAtom),
+    Text = <<"{\"collectionName\": \"123\", \"$schema\": \"ref\"}">>,
+    {ok, Json} = resource_object:from_string(Text),
+    BsonDocument = schema_object:from_json(Json),
     ?assertEqual({'_id', <<"123">>, '%24schema', <<"ref">>}, BsonDocument).
 
 

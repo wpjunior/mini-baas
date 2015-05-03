@@ -17,13 +17,14 @@ handle(<<"GET">>, CollectionName, Req, Opts) ->
 handle(<<"POST">>, CollectionName, Req, Opts) ->
     {ok, Body, _} = cowboy_req:body(Req),
 
-    case resource_object:from_json(Body) of
-        {ok, Resource} ->
+    case resource_object:from_string(Body) of
+        {ok, JsonDocument} ->
+            Resource = resource_object:from_json(JsonDocument),
             ResourceWithPrimaryKey = database_service:insert(CollectionName, Resource),
             JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
             responses:json_created(Req, Opts, JsonBody);
 
-        {invalid_json, _} ->
+        invalid_json ->
             responses:invalid_json(Req, Opts)
     end;
 

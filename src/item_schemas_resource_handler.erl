@@ -24,8 +24,10 @@ handle(<<"GET">>, CollectionName, Req, Opts)->
 handle(<<"PUT">>, CollectionName, Req, Opts)->
     {ok, Body, _} = cowboy_req:body(Req),
 
-    case schema_object:from_json(Body) of
-        {ok, Attributes} ->
+    case resource_object:from_string(Body) of
+        {ok, JsonAttributes} ->
+            Attributes = resource_object:from_json(JsonAttributes),
+
             case database_service:update_attributes(?ITEM_SCHEMA_COLLECTION, CollectionName, Attributes) of
                 {ok, Document} ->
                     JsonBody = schema_object:to_json(Document),
@@ -36,7 +38,7 @@ handle(<<"PUT">>, CollectionName, Req, Opts)->
 
             end;
 
-        {invalid_json, _} ->
+        invalid_json ->
             responses:invalid_json(Req, Opts)
     end;
 

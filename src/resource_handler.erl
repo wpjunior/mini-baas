@@ -9,7 +9,7 @@ init(Req, Opts) ->
     handle(Method, CollectionName, Id, Req, Opts).
 
 handle(<<"GET">>, CollectionName, Id, Req, Opts)->
-    case database_service:find_by_id(CollectionName, Id) of
+    case database:find_by_id(CollectionName, Id) of
         {ok, Document} ->
             JsonBody = resource_object:to_json(Document),
             responses:json_success(Req, Opts, JsonBody);
@@ -24,7 +24,7 @@ handle(<<"PUT">>, CollectionName, Id, Req, Opts)->
     case resource_object:from_string(Body) of
         {ok, JsonAttributes} ->
             Attributes = resource_object:from_json(JsonAttributes),
-            case database_service:update_attributes(CollectionName, Id, Attributes) of
+            case database:update_attributes(CollectionName, Id, Attributes) of
                 {ok, Document} ->
                     JsonBody = resource_object:to_json(Document),
                     responses:json_success(Req, Opts, JsonBody);
@@ -39,7 +39,7 @@ handle(<<"PUT">>, CollectionName, Id, Req, Opts)->
     end;
 
 handle(<<"DELETE">>, CollectionName, Id, Req, Opts) ->
-    case database_service:delete_by_id(CollectionName, Id) of
+    case database:delete_by_id(CollectionName, Id) of
         ok ->
             responses:no_content(Req, Opts);
         not_found ->

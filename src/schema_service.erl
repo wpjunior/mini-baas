@@ -52,7 +52,7 @@ handle_schema_is_found(memory, CollectionName, Schemas) ->
     end;
 
 handle_schema_is_found(database, CollectionName, Schemas) ->
-    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
+    case database:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
         {ok, Document} ->
             Schema = schema_object:to_json(Document),
             NewSchemas = gb_trees:enter(CollectionName, Schema, Schemas),
@@ -71,7 +71,7 @@ handle_get_schema(memory, CollectionName, Schemas) ->
     end;
 
 handle_get_schema(database, CollectionName, Schemas) ->
-    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
+    case database:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
         {ok, Document} ->
             Schema = schema_object:to_json(Document),
             NewSchemas = gb_trees:enter(CollectionName, Schema, Schemas),

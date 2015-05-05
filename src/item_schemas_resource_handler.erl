@@ -11,7 +11,7 @@ init(Req, Opts) ->
 
 
 handle(<<"GET">>, CollectionName, Req, Opts)->
-    case database_service:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
+    case database:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
         {ok, Document} ->
             JsonBody = schema_object:to_json(Document),
             responses:json_success(Req, Opts, JsonBody);
@@ -28,7 +28,7 @@ handle(<<"PUT">>, CollectionName, Req, Opts)->
         {ok, JsonAttributes} ->
             Attributes = resource_object:from_json(JsonAttributes),
 
-            case database_service:update_attributes(?ITEM_SCHEMA_COLLECTION, CollectionName, Attributes) of
+            case database:update_attributes(?ITEM_SCHEMA_COLLECTION, CollectionName, Attributes) of
                 {ok, Document} ->
                     JsonBody = schema_object:to_json(Document),
                     responses:json_success(Req, Opts, JsonBody);
@@ -44,7 +44,7 @@ handle(<<"PUT">>, CollectionName, Req, Opts)->
 
 
 handle(<<"DELETE">>, CollectionName, Req, Opts) ->
-    case database_service:delete_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
+    case database:delete_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
         ok ->
             responses:no_content(Req, Opts);
         not_found ->

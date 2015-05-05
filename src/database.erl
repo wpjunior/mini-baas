@@ -1,4 +1,4 @@
--module(database_service).
+-module(database).
 
 -export([init/0, stop/0, exists/2, find_by_id/2, delete_by_id/2,
          update_attributes/3, insert/2, find/2]).

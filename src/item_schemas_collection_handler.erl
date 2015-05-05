@@ -12,7 +12,7 @@ handle(<<"GET">>, Req, Opts) ->
     Filter = filter_builder:build_from_req(Req),
     Where = filter_builder:where(Filter),
 
-    Result = database_service:find(?ITEM_SCHEMA_COLLECTION, Where),
+    Result = database:find(?ITEM_SCHEMA_COLLECTION, Where),
     JsonBody = schema_object:to_json_list(Result),
 
     responses:json_success(Req, Opts, JsonBody);
@@ -24,7 +24,7 @@ handle(<<"POST">>, Req, Opts) ->
     case resource_object:from_string(Body) of
         {ok, JsonDocument} ->
             Schema = schema_object:from_json(JsonDocument),
-            database_service:insert(?ITEM_SCHEMA_COLLECTION, Schema),
+            database:insert(?ITEM_SCHEMA_COLLECTION, Schema),
             JsonBody = schema_object:to_json(Schema),
             responses:json_created(Req, Opts, JsonBody);
 

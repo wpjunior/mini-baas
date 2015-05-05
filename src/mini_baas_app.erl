@@ -8,7 +8,7 @@
 %% API.
 
 start(_Type, _Args) ->
-    database_service:init(),
+    database:init(),
     {ok, _} = schema_service:start_link(),
 
     Dispatch = cowboy_router:compile([

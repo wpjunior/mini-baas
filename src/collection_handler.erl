@@ -9,9 +9,7 @@ init(Req, Opts) ->
 
 handle(<<"GET">>, CollectionName, Req, Opts) ->
     Filter = filter_builder:build_from_req(Req),
-    Where = filter_builder:where(Filter),
-    Result = database:find(CollectionName, Where),
-    JsonBody = resource_object:to_json_list(Result),
+    JsonBody = resources:find(CollectionName, Filter),
     responses:json_success(Req, Opts, JsonBody);
 
 handle(<<"POST">>, CollectionName, Req, Opts) ->
@@ -19,9 +17,7 @@ handle(<<"POST">>, CollectionName, Req, Opts) ->
 
     case resource_object:from_string(Body) of
         {ok, JsonDocument} ->
-            Resource = resource_object:from_json(JsonDocument),
-            ResourceWithPrimaryKey = database:insert(CollectionName, Resource),
-            JsonBody = resource_object:to_json(ResourceWithPrimaryKey),
+            JsonBody = resources:create(CollectionName, JsonDocument),
             responses:json_created(Req, Opts, JsonBody);
 
         invalid_json ->

@@ -9,7 +9,7 @@ init(Req, Opts) ->
     handle(Method, CollectionName, Id, Req, Opts).
 
 handle(<<"GET">>, CollectionName, Id, Req, Opts)->
-    case database:find_by_id(CollectionName, Id) of
+    case resources:find_by_id(CollectionName, Id) of
         {ok, Document} ->
             JsonBody = resource_object:to_json(Document),
             responses:json_success(Req, Opts, JsonBody);
@@ -23,15 +23,12 @@ handle(<<"PUT">>, CollectionName, Id, Req, Opts)->
 
     case resource_object:from_string(Body) of
         {ok, JsonAttributes} ->
-            Attributes = resource_object:from_json(JsonAttributes),
-            case database:update_attributes(CollectionName, Id, Attributes) of
-                {ok, Document} ->
-                    JsonBody = resource_object:to_json(Document),
+            case resources:update_attributes(CollectionName, Id, JsonAttributes) of
+                {ok, JsonBody} ->
                     responses:json_success(Req, Opts, JsonBody);
 
                 not_found ->
                     responses:not_found(Req, Opts)
-
             end;
 
         invalid_json ->

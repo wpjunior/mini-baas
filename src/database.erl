@@ -47,21 +47,8 @@ update_attributes(CollectionName, Id, Attributes) ->
     end.
 
 insert(CollectionName, Resource) ->
-    ResourceWithPrimaryKey = insert_primary_key_if_necessary(Resource),
-    mongo:insert(?PID_ALIAS, CollectionName, [ResourceWithPrimaryKey]),
-    ResourceWithPrimaryKey.
-
-insert_primary_key_if_necessary(Resource) ->
-    %% TODO: This function can be improved, the method looks like assign_id method at erlang driver, see more:
-    %% https://github.com/comtihon/mongodb-erlang/blob/master/src/api/mongo.erl#L215
-
-    case bson:lookup('_id', Resource, undefined) of
-        undefined ->
-            PrimaryKey = list_to_binary(uuid:to_string(uuid:uuid4())),
-            bson:update('_id', PrimaryKey, Resource);
-        _ ->
-            Resource
-    end.
+    mongo:insert(?PID_ALIAS, CollectionName, [Resource]),
+    Resource.
 
 find(CollectionName, Where) ->
     Cursor = mongo:find(?PID_ALIAS, CollectionName, Where),

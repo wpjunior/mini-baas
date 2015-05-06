@@ -5,6 +5,7 @@ import json
 import sure
 import urls
 
+from time import sleep
 from unittest import TestCase, skip
 
 
@@ -20,6 +21,8 @@ class TestSuccessfullyPUT(TestCase):
             headers={
                 'content-type': 'application/json'
             }).json()
+
+        sleep(1)
 
         cls.response = requests.put(
             urls.test_resource_url(cls.before_item['id']),
@@ -44,22 +47,22 @@ class TestSuccessfullyPUT(TestCase):
         location_url = urls.test_resource_url(self.json_response['id'])
         self.response.headers['location'].should.equal(location_url)
 
-    @skip("future feature")
     def test_created_field(self):
         self.json_response.should.have.key('created').not_be.being.none
 
-    @skip("future feature")
     def test_created_not_changed(self):
         self.json_response['created'].should.equal(self.before_item['created'])
 
-    @skip("future feature")
     def test_modified_field(self):
         self.json_response.should.have.key('modified').not_be.being.none
 
-    @skip("future feature")
-    def test_modified_not_changed(self):
+    def test_modified_changed(self):
         self.json_response['modified'].should.not_be.equal(
             self.before_item['modified'])
+
+    def test_version_id_changed(self):
+        self.json_response['versionId'].should.not_be.equal(
+            self.before_item['versionId'])
 
     def test_primary_key(self):
         self.json_response.should.have.key('id')
@@ -139,6 +142,5 @@ class TestPOSTWithCustomId(TestCase):
         self.response.status_code.should.equal(201)
 
     def test_json_response_value(self):
-        self.json_response.should.equal({
-            'id': 'my-custom-body', 'name': 'wilson'
-        })
+        self.json_response['id'].should.equal('my-custom-body')
+        self.json_response['name'].should.equal('wilson')

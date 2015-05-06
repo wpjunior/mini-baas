@@ -12,7 +12,8 @@
                 jiffy,
                 uuid,
                 qsp,
-                jesse
+                jesse,
+                iso8601
         ]},
 	{mod, {mini_baas_app, []}},
 	{env, []}

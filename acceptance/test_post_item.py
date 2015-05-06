@@ -5,7 +5,7 @@ import json
 import sure
 import re
 import urls
-UUID4_HEX = re.compile('[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z', re.I)
+UUID4_HEX = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 
 from unittest import TestCase, skip
 
@@ -48,11 +48,9 @@ class TestSuccessfullyPOST(TestCase):
         location_url = urls.test_resource_url(self.json_response['id'])
         self.response.headers['location'].should.equal(location_url)
 
-    @skip("future feature")
     def test_created_field(self):
         self.json_response.should.have.key('created').not_be.being.none
 
-    @skip("future feature")
     def test_modified_field(self):
         self.json_response.should.have.key('modified').not_be.being.none
 
@@ -124,6 +122,6 @@ class TestPOSTWithCustomId(TestCase):
         self.response.status_code.should.equal(201)
 
     def test_json_response_value(self):
-        self.json_response.should.equal({
-            'id': 'my-custom-body', 'name': 'wilson'
-        })
+        self.json_response['id'].should.equal('my-custom-body')
+        self.json_response['name'].should.equal('wilson')
+        self.json_response['versionId'].should.match(UUID4_HEX)

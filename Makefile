@@ -11,6 +11,9 @@ run-dev:
 run: build relx-rel
 	$(BUILD_BIN) foreground
 
+shell-dev:
+	erl -pa ebin/ -pa deps/*/ebin
+
 build:
 	./rebar co
 

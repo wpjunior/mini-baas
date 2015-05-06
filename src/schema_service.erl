@@ -5,7 +5,6 @@
 -export([init/1, handle_call/3, handle_cast/2]).
 -export([schema_is_found/1, validate/2, reset_cache/0]).
 
--define(ITEM_SCHEMA_COLLECTION, <<"item-schemas">>).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -37,7 +36,7 @@ reset_cache() ->
 handle_cast(stop, Schemas) ->
     {stop, normal, Schemas};
 
-handle_cast(reset_cache, Schemas) ->
+handle_cast(reset_cache, _Schemas) ->
     {noreply, gb_trees:empty()}.
 
 terminate(normal, _) ->
@@ -52,9 +51,8 @@ handle_schema_is_found(memory, CollectionName, Schemas) ->
     end;
 
 handle_schema_is_found(database, CollectionName, Schemas) ->
-    case database:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
-        {ok, Document} ->
-            Schema = schema_object:to_json(Document),
+    case schemas:find_by_collection_name(CollectionName) of
+        {ok, Schema} ->
             NewSchemas = gb_trees:enter(CollectionName, Schema, Schemas),
             {true, NewSchemas};
 
@@ -66,14 +64,14 @@ handle_get_schema(memory, CollectionName, Schemas) ->
     case gb_trees:lookup(CollectionName, Schemas) of
         {value, Schema} ->
             {Schema, Schemas};
+
         none ->
             handle_get_schema(database, CollectionName, Schemas)
     end;
 
 handle_get_schema(database, CollectionName, Schemas) ->
-    case database:find_by_id(?ITEM_SCHEMA_COLLECTION, CollectionName) of
-        {ok, Document} ->
-            Schema = schema_object:to_json(Document),
+    case schemas:find_by_collection_name(CollectionName) of
+        {ok, Schema} ->
             NewSchemas = gb_trees:enter(CollectionName, Schema, Schemas),
             {Schema, NewSchemas};
 

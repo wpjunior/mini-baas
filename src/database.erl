@@ -1,7 +1,7 @@
 -module(database).
 
 -export([init/0, stop/0, exists/2, find_by_id/2, delete_by_id/2,
-         update_attributes/3, insert/2, find/2]).
+         update_attributes/3, atomic_update/3, insert/2, find/2]).
 
 -define(PID_ALIAS, database_connection).
 
@@ -37,14 +37,18 @@ delete_by_id(CollectionName, Id) ->
 update_attributes(CollectionName, Id, Attributes) ->
     case find_by_id(CollectionName, Id) of
         {ok, Document} ->
-            UpdateCommand = {'$set', Attributes},
-            ok = mongo:update(?PID_ALIAS, CollectionName, {'_id', Id}, UpdateCommand),
+            ok = atomic_update(CollectionName, Id, Attributes),
             UpdatedDocument = bson:merge(Attributes, Document),
             {ok, UpdatedDocument};
 
         not_found ->
             not_found
     end.
+
+atomic_update(CollectionName, Id, Attributes) ->
+    UpdateCommand = {'$set', Attributes},
+    ok = mongo:update(?PID_ALIAS, CollectionName, {'_id', Id}, UpdateCommand),
+    ok.
 
 insert(CollectionName, Resource) ->
     mongo:insert(?PID_ALIAS, CollectionName, [Resource]),

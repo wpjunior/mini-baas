@@ -15,12 +15,20 @@ create(CollectionName, JsonDocument) ->
     end.
 
 update_attributes(CollectionName, Id, Attributes) ->
-    Attributes2 = before_update(Attributes),
-    BsonAttributes = resource_object:from_json(Attributes2),
-    case database:update_attributes(CollectionName, Id, BsonAttributes) of
-        {ok, BsonDocument} ->
-            JsonBody = resource_object:to_json(BsonDocument),
-            {ok, JsonBody};
+    case find_by_id(CollectionName, Id) of
+        {ok, Resource} ->
+            Attributes2 = before_update(Attributes),
+            ResourceUpdated = overwrite_properties(Attributes2, Resource),
+
+            case schema_service:validate(CollectionName, ResourceUpdated) of
+                valid ->
+                    BsonAttributes = resource_object:from_json(Attributes2),
+                    ok = database:atomic_update(CollectionName, Id, BsonAttributes),
+                    {ok, ResourceUpdated};
+
+                {invalid, _Errors}->
+                    {invalid, []}
+            end;
 
         not_found ->
             not_found
@@ -47,17 +55,17 @@ find(CollectionName, Filter) ->
 before_create(Resource) ->
     Now = iso8601:format(now()),
     VersionId = new_identifier(),
-    MetaData = [{<<"created">>, Now}, {<<"modified">>, Now}, {<<"versionId">>, VersionId}],
+    MetaData = {[{<<"created">>, Now}, {<<"modified">>, Now}, {<<"versionId">>, VersionId}]},
     ResourceWithMetaData = overwrite_properties(MetaData, Resource),
     insert_primary_key_if_necessary(ResourceWithMetaData).
 
 before_update(Attributes) ->
     Now = iso8601:format(now()),
     VersionId = new_identifier(),
-    MetaData = [{<<"modified">>, Now}, {<<"versionId">>, VersionId}],
+    MetaData = {[{<<"modified">>, Now}, {<<"versionId">>, VersionId}]},
     overwrite_properties(MetaData, Attributes).
 
-overwrite_properties(Properties, {AttrList}) ->
+overwrite_properties({Properties}, {AttrList}) ->
     {lists:foldl(fun overwrite_property/2, AttrList, Properties)}.
 
 overwrite_property({Key, Value}, AttrList) ->

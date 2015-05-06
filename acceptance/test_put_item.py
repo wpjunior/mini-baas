@@ -14,7 +14,22 @@ class TestSuccessfullyPUT(TestCase):
     def setUpClass(cls):
         data = {'name': 'PUT Alice', }
         put_data = {'age': 30}
+        requests.delete(urls.TEST_ITEM_SCHEMA_URL)
+        schema = {
+            '$schema': 'http://json-schema.org/draft-03/schema#',
+            'collectionName': urls.TEST_COLLECTION_NAME,
+            'properties': {
+                'name': {'type': 'string'}
+            },
+            'type': 'object'
+        }
 
+        requests.post(
+            urls.collection_url('item-schemas'),
+            data=json.dumps(schema),
+            headers={
+                'content-type': 'application/json'
+            })
         cls.before_item = requests.post(
             urls.TEST_COLLECTION_URL,
             data=json.dumps(data),
@@ -73,6 +88,16 @@ class TestSuccessfullyPUT(TestCase):
         self.json_response['name'].should.equal('PUT Alice')
         self.json_response['age'].should.equal(30)
 
+    def test_invalid_data(self):
+        data = {'name': 1992}
+        response = requests.put(
+            urls.test_resource_url(self.before_item['id']),
+            data=json.dumps(data),
+            headers={
+                'content-type': 'application/json'
+            })
+
+        response.status_code.should.equal(422)
 
 class TestInvalidBodyPUT(TestCase):
     @classmethod

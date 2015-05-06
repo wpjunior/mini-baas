@@ -3,9 +3,16 @@
 
 create(CollectionName, JsonDocument) ->
     JsonDocument2 = before_create(JsonDocument),
-    BsonResource = resource_object:from_json(JsonDocument2),
-    database:insert(CollectionName, BsonResource),
-    JsonDocument2.
+
+    case schema_service:validate(CollectionName, JsonDocument2) of
+        valid ->
+            BsonResource = resource_object:from_json(JsonDocument2),
+            database:insert(CollectionName, BsonResource),
+            {ok, JsonDocument2};
+
+        {invalid, _Errors}->
+            {invalid, []}
+    end.
 
 update_attributes(CollectionName, Id, Attributes) ->
     Attributes2 = before_update(Attributes),

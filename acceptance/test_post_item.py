@@ -13,10 +13,16 @@ from unittest import TestCase, skip
 class TestSuccessfullyPOST(TestCase):
     @classmethod
     def setUpClass(cls):
+        requests.delete(urls.TEST_ITEM_SCHEMA_URL)
         schema = {
             '$schema': 'http://json-schema.org/draft-03/schema#',
-            'collectionName': urls.TEST_COLLECTION_NAME
+            'collectionName': urls.TEST_COLLECTION_NAME,
+            'properties': {
+                'name': {'type': 'string'}
+            },
+            'type': 'object'
         }
+
         requests.post(
             urls.collection_url('item-schemas'),
             data=json.dumps(schema),
@@ -62,6 +68,16 @@ class TestSuccessfullyPOST(TestCase):
     def test_posted_value(self):
         self.json_response['name'].should.equal('POST Alice')
 
+    def test_invalid_data(self):
+        data = {'name': 1992}
+        response = requests.post(
+            urls.TEST_COLLECTION_URL,
+            data=json.dumps(data),
+            headers={
+                'content-type': 'application/json'
+            })
+
+        response.status_code.should.equal(422)
 
 class TestPostInvalidBody(TestCase):
     @classmethod

@@ -35,7 +35,7 @@ class TestSuccessfully(TestCase):
     def test_include_items(self):
         names = [item['collectionName'] for item in self.json_response['items']]
         names.should.contain(urls.TEST_COLLECTION_NAME)
-        names.should.have.length_of(1)
+        self.assertTrue(len(names) >= 1)
 
     def test_include_schema(self):
         self.json_response['items'][0].should.have.key('$schema')

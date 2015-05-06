@@ -5,6 +5,8 @@
 -export([init/1, handle_call/3, handle_cast/2]).
 -export([schema_is_found/1, validate/2, reset_cache/0]).
 
+-define(DEFAULT_STORAGE, database).
+
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -14,7 +16,7 @@ init(_) ->
     {ok, Schemas}.
 
 handle_call({schema_is_found, CollectionName}, _From, Schemas) ->
-    {Found, NewSchemas} = handle_schema_is_found(memory, CollectionName, Schemas),
+    {Found, NewSchemas} = handle_schema_is_found(?DEFAULT_STORAGE, CollectionName, Schemas),
     {reply, Found, NewSchemas};
 
 handle_call({validate, CollectionName, Resource}, _From, Schemas) ->
@@ -80,7 +82,7 @@ handle_get_schema(database, CollectionName, Schemas) ->
     end.
 
 handle_validate(CollectionName, Resource, Schemas) ->
-    case handle_get_schema(memory, CollectionName, Schemas) of
+    case handle_get_schema(?DEFAULT_STORAGE, CollectionName, Schemas) of
         not_found ->
             {false, Schemas};
 

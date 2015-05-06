@@ -10,8 +10,7 @@ init(Req, Opts) ->
 
 handle(<<"GET">>, CollectionName, Id, Req, Opts)->
     case resources:find_by_id(CollectionName, Id) of
-        {ok, Document} ->
-            JsonBody = resource_object:to_json(Document),
+        {ok, JsonBody} ->
             responses:json_success(Req, Opts, JsonBody);
 
         not_found ->

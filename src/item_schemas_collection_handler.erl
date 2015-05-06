@@ -1,6 +1,5 @@
 -module(item_schemas_collection_handler).
 -export([init/2]).
--define(ITEM_SCHEMA_COLLECTION, <<"item-schemas">>).
 
 
 init(Req, Opts) ->
@@ -10,11 +9,7 @@ init(Req, Opts) ->
 
 handle(<<"GET">>, Req, Opts) ->
     Filter = filter_builder:build_from_req(Req),
-    Where = filter_builder:where(Filter),
-
-    Result = database:find(?ITEM_SCHEMA_COLLECTION, Where),
-    JsonBody = schema_object:to_json_list(Result),
-
+    JsonBody = schemas:find(Filter),
     responses:json_success(Req, Opts, JsonBody);
 
 
@@ -23,9 +18,7 @@ handle(<<"POST">>, Req, Opts) ->
 
     case resource_object:from_string(Body) of
         {ok, JsonDocument} ->
-            Schema = schema_object:from_json(JsonDocument),
-            database:insert(?ITEM_SCHEMA_COLLECTION, Schema),
-            JsonBody = schema_object:to_json(Schema),
+            JsonBody = schemas:create(JsonDocument),
             responses:json_created(Req, Opts, JsonBody);
 
         invalid_json ->

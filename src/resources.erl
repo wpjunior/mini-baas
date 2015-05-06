@@ -20,7 +20,14 @@ update_attributes(CollectionName, Id, Attributes) ->
     end.
 
 find_by_id(CollectionName, Id) ->
-    database:find_by_id(CollectionName, Id).
+    case database:find_by_id(CollectionName, Id) of
+        {ok, BsonDocument} ->
+            JsonBody = resource_object:to_json(BsonDocument),
+            {ok, JsonBody};
+
+        not_found ->
+            not_found
+    end.
 
 delete_by_id(CollectionName, Id) ->
     database:delete_by_id(CollectionName, Id).

@@ -20,8 +20,9 @@ handle(<<"POST">>, CollectionName, Req, Opts) ->
             case resources:create(CollectionName, JsonDocument) of
                 {ok, JsonBody} ->
                     responses:json_created(Req, Opts, JsonBody);
-                {invalid, _Errors} ->
-                    responses:invalid_json(Req, Opts)
+
+                {invalid, Errors} ->
+                    responses:invalid_json(Req, Opts, Errors)
             end;
 
         invalid_json ->

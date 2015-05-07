@@ -98,6 +98,8 @@ class TestSuccessfullyPUT(TestCase):
             })
 
         response.status_code.should.equal(422)
+        errors = response.json()
+        errors.should.equal({'errors': {'/name': 'Wrong type'}})
 
 class TestInvalidBodyPUT(TestCase):
     @classmethod

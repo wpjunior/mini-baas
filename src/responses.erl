@@ -1,5 +1,5 @@
 -module(responses).
--export([not_found/2, invalid_json/2, method_not_allowed/2,
+-export([not_found/2, invalid_json/2, invalid_json/3, method_not_allowed/2,
          no_content/2, json_success/3, json_created/3]).
 
 not_found(Req, Opts) ->
@@ -8,6 +8,14 @@ not_found(Req, Opts) ->
 
 invalid_json(Req, Opts) ->
     Resp = cowboy_req:reply(422, Req),
+    {ok, Resp, Opts}.
+
+invalid_json(Req, Opts, Errors) ->
+    JsonBody = {[{<<"errors">>, {Errors}}]},
+    Resp = cowboy_req:reply(422, [
+        {<<"content-type">>, <<"application/json">>}
+    ], jiffy:encode(JsonBody), Req),
+
     {ok, Resp, Opts}.
 
 method_not_allowed(Req, Opts) ->

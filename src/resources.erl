@@ -10,8 +10,8 @@ create(CollectionName, JsonDocument) ->
             database:insert(CollectionName, BsonResource),
             {ok, JsonDocument2};
 
-        {invalid, _Errors}->
-            {invalid, []}
+        {invalid, Errors}->
+            {invalid, Errors}
     end.
 
 update_attributes(CollectionName, Id, Attributes) ->
@@ -26,8 +26,8 @@ update_attributes(CollectionName, Id, Attributes) ->
                     ok = database:atomic_update(CollectionName, Id, BsonAttributes),
                     {ok, ResourceUpdated};
 
-                {invalid, _Errors}->
-                    {invalid, []}
+                {invalid, Errors}->
+                    {invalid, Errors}
             end;
 
         not_found ->

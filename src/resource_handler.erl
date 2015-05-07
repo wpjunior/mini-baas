@@ -26,8 +26,8 @@ handle(<<"PUT">>, CollectionName, Id, Req, Opts)->
                 {ok, JsonBody} ->
                     responses:json_success(Req, Opts, JsonBody);
 
-                {invalid, _Errors} ->
-                    responses:invalid_json(Req, Opts);
+                {invalid, Errors} ->
+                    responses:invalid_json(Req, Opts, Errors);
 
                 not_found ->
                     responses:not_found(Req, Opts)

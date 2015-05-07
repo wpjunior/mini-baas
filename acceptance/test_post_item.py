@@ -78,6 +78,8 @@ class TestSuccessfullyPOST(TestCase):
             })
 
         response.status_code.should.equal(422)
+        errors = response.json()
+        errors.should.equal({'errors': {'/name': 'Wrong type'}})
 
 class TestPostInvalidBody(TestCase):
     @classmethod
